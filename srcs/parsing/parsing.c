@@ -27,18 +27,37 @@ int     skip_spaces(char *cmd)
     return(i);
 }
 
+int check_close(char *value, int i)
+{
+    while (value[i])
+    {
+        if(value[i] == '\"')
+            return(1);
+        i++;
+    }
+    return(0);
+}
+
 int len_token(char *cmd, int start)
 {
     int i;
     int len;
+    int close;
 
     i = start;
     len = 0;
+    close = 0;
     while (cmd[i])
     {
         if(cmd[i] == '\"')
         {
             i++;
+            close = check_close(cmd, i);
+			if(!close)
+            {
+                len = -1;
+                return(len);
+            }
             len++;
             while (cmd[i])
             {
@@ -48,11 +67,8 @@ int len_token(char *cmd, int start)
                 i++;
             }
         }
-        else
-        {
-            i++;
-            len++;
-        }
+        i++;
+        len++;
         if(cmd[i] == ' ')
             break;
     }
@@ -68,6 +84,11 @@ char     *get_token(char *cmd, int *start)
     i = 0;
     token = NULL;
     len = len_token(cmd,*start);
+    if(len == -1)
+    {
+        *start = -1;
+        return(NULL);
+    }
     token = (char *)malloc(sizeof(char) * (len + 1));
     token[len] = '\0';
     while (token[i])
@@ -90,14 +111,21 @@ void    parsing(char *cmd, int *error)
     token = NULL;
     while (cmd[start])
     {
-        
         if(cmd[start] != ' ')
         {
             token = get_token(cmd,&start);
+            if(start == -1)
+            {
+                *error = -1;
+                break;
+            }
             list_tokens(&head,token);
         }
         start++;
     }
-    *error = check_tokens(head,*error);
+    if(*error != -1)
+    {
+        *error = check_tokens(head,*error);
+    }
     *error = 1;
 }

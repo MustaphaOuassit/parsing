@@ -173,24 +173,37 @@ int		len_word(char *value, int start)
 int    check_tokens(t_list *head, int error)
 {
 	int i;
+	int type;
+	char *token;
+	char *token_word;
+	int len;
 
 	i = 0;
+	token = NULL;
+	token_word = NULL;
     while (head != NULL)
     {
-		int type;
-		char *token;
-		//char *token_word;
-		int len;
-
 		i = 0;
 		len = 0;
-		while (head->value[i])
+		while (i <= (int)ft_strlen(head->value))
 		{
 			len = len_word(head->value,i);
-			printf("Len : %d\n",len);
-			break;
-			if(check_dividers(head->value[i],&type))
+			if(len)
 			{
+				token_word = (char *)malloc(sizeof(char) * (len + 1));
+				token_word[len] = '\0';
+				len = 0;
+				while (token_word[len])
+				{
+					token_word[len] = head->value[i];
+					i++;
+					len++;
+				}
+			}
+			if(head->value[i] && check_dividers(head->value[i],&type))
+			{
+				if(token_word)
+					put_in_parcer(token_word,10);
 				token = put_diveder(head->value,head->value[i],&i,&type);
 				put_in_parcer(token,type);
 			}
