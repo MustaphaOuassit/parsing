@@ -78,6 +78,98 @@ char	*put_diveder(char *data, int value, int *i,int *type)
 	return(token);
 }
 
+int		check_dollar(char *value, int start)
+{
+	int len;
+
+	len = 0;
+	while (value[start])
+	{
+		if (value[start] == ' ' || value[start] == '\"')
+			break;
+		len++;
+		start++;
+	}
+	return(len);
+}
+
+char	*get_env(char *value)
+{
+	value[0] = 'd';
+	char *str = ft_strdup("ls -la");
+	return(str);
+}
+
+int		len_word(char *value, int start)
+{
+	int i;
+	int close;
+	char *dollar;
+	int len_dollar;
+
+	i = 0;
+	close = 0;
+	dollar = NULL;
+	len_dollar = 0;
+	while (value[start])
+	{
+		if(value[start] == '|' || value[start] == '>' || value[start] == '<' || value[start] == '$')
+			break;
+		if (value[start] == '\"')
+		{
+			start++;
+			// close = check_close(value, start);
+			// if(!close)
+			// 	return(-1);
+			while (value[start])
+			{
+				if(value[start] == '\"')
+					break;
+				if(value[start] == '$')
+				{
+					len_dollar = check_dollar(value,start + 1);
+					dollar = (char *)malloc(sizeof(char) * (len_dollar + 1));
+					dollar[len_dollar] = '\0';
+					len_dollar = 0;
+					start++;
+					while (dollar[len_dollar])
+					{
+						dollar[len_dollar] = value[start];
+						len_dollar++;
+						start++;
+					}
+					start--;
+					if(dollar)
+					{
+						i = i + (int)ft_strlen(get_env(dollar));
+						i--;
+					}
+				}
+				i++;
+				start++;
+			}
+		}
+		else if (value[start] == '\'')
+		{
+			start++;
+			// close = check_close(value, start);
+			// if(!close)
+			// 	return(-1);
+			while (value[start])
+			{
+				if(value[start] == '\'')
+					break;
+				i++;
+				start++;
+			}
+		}
+		else
+			i++;
+		start++;
+	}
+	return(i);
+}
+
 int    check_tokens(t_list *head, int error)
 {
 	int i;
@@ -87,12 +179,16 @@ int    check_tokens(t_list *head, int error)
     {
 		int type;
 		char *token;
+		//char *token_word;
+		int len;
 
 		i = 0;
-
+		len = 0;
 		while (head->value[i])
 		{
-
+			len = len_word(head->value,i);
+			printf("Len : %d\n",len);
+			break;
 			if(check_dividers(head->value[i],&type))
 			{
 				token = put_diveder(head->value,head->value[i],&i,&type);
