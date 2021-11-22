@@ -53,6 +53,31 @@ void	put_in_parcer(char *value, int type)
 	printf("V : %s T : %d\n",value,type);
 }
 
+char	*put_diveder(char *data, int value, int *i,int *type)
+{
+	char *token;
+	
+	token = (char *)malloc(sizeof(char) * (2));
+	if((value == '>' && data[*i + 1] && data[*i + 1] == '>'))
+	{
+		token = ft_strdup(">>");
+		*type = 4;
+		*i = *i + 1;
+	}
+	else if((value == '<' && data[*i + 1] && data[*i + 1] == '<'))
+	{
+		token = ft_strdup("<<");
+		*type = 5;
+		*i = *i + 1;
+	}
+	else
+	{
+		token[0] = value;
+		token[1] = '\0';
+	}
+	return(token);
+}
+
 int    check_tokens(t_list *head, int error)
 {
 	int i;
@@ -61,36 +86,20 @@ int    check_tokens(t_list *head, int error)
     while (head != NULL)
     {
 		int type;
-		char *dividers;
+		char *token;
 
 		i = 0;
-		dividers = (char *)malloc(sizeof(char) * (2));
+
 		while (head->value[i])
 		{
+
 			if(check_dividers(head->value[i],&type))
 			{
-				if((head->value[i] == '>' && head->value[i + 1] && head->value[i + 1] == '>'))
-				{
-					dividers = ft_strdup(">>");
-					type = 4;
-					i++;
-				}
-				else if((head->value[i] == '<' && head->value[i + 1] && head->value[i + 1] == '<'))
-				{
-					dividers = ft_strdup("<<");
-					type = 5;
-					i++;
-				}
-				else
-				{
-					dividers[0] = head->value[i];
-					dividers[1] = '\0';
-				}
-				put_in_parcer(dividers,type);
+				token = put_diveder(head->value,head->value[i],&i,&type);
+				put_in_parcer(token,type);
 			}
 			i++;
 		}
-		
         head = head->next;
     }
     error = 2;
