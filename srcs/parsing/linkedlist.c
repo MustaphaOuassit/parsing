@@ -409,30 +409,35 @@ void	put_word(char **token_word,char *value, int *i,int *type)
 	insert_dividers(value,i,type);
 }
 
-void	put_data_token(char **token_word, char *value, int *i)
+char *put_data_token(int *len, char *value, int *i)
 {
-	int len;
+	char *token_word;
 
-	len = 0;
-	while (len <= (int)ft_strlen(*token_word))
+	token_word = NULL;
+	token_word = (char *)malloc(sizeof(char) * (*len + 1));
+	token_word[*len] = '\0';
+	*len = 0;
+	while (*len <= (int)ft_strlen(token_word))
 	{
 		if(value[*i] == '\"')
-			*token_word = word_double_couts(i,value,&len,*token_word);
+			token_word = word_double_couts(i, value,len,token_word);
 		else if(value[*i] == '\'')
-			*token_word = word_single_couts(i,value,&len,*token_word);
-		else if(value[*i] == '>' || value[*i] == '<' || value[*i] == '|' || value[*i] == '$')
+		token_word = word_single_couts(i, value,len,token_word);
+		else if(value[*i] == '>' || value[*i] == '<' ||
+		value[*i] == '|' || value[*i] == '$')
 		{
 			*i = *i + 1;
 			break;
 		}
 		else
 		{
-			printf("len : %d\n",(int)ft_strlen(*token_word));
-			*token_word[len] = value[*i];
+			token_word[*len] = value[*i];
 			*i = *i + 1;
-			len++;
+			*len = *len + 1;
 		}
 	}
+	*i = *i - 1;
+	return(token_word);
 }
 
 int    check_tokens(t_list *head, int error)
@@ -457,31 +462,7 @@ int    check_tokens(t_list *head, int error)
 		{
 			len = len_word(head->value,i);
 			if(len)
-			{
-				token_word = (char *)malloc(sizeof(char) * (len + 1));
-				token_word[len] = '\0';
-				len = 0;
-				//put_data_token(&token_word,head->value,&i);
-				while (len <= (int)ft_strlen(token_word))
-				{
-					if(head->value[i] == '\"')
-						token_word = word_double_couts(&i, head->value,&len,token_word);
-					else if(head->value[i] == '\'')
-						token_word = word_single_couts(&i, head->value,&len,token_word);
-					else if(head->value[i] == '>' || head->value[i] == '<' || head->value[i] == '|' || head->value[i] == '$')
-					{
-						i++;
-						break;
-					}
-					else
-					{
-						token_word[len] = head->value[i];
-						i++;
-						len++;
-					}
-				}
-				i--;
-			}
+				token_word = put_data_token(&len, head->value,&i);
 			put_word(&token_word,head->value,&i,&type);
 			i++;
 		}
