@@ -181,33 +181,278 @@ int		len_word(char *value, int start)
 	return(i);
 }
 
+// void	get_word()
+// {
+// 	if(len)
+// 	{
+// 		token_word = (char *)malloc(sizeof(char) * (len + 1));
+// 		token_word[len] = '\0';
+// 		len = 0;
+// 		while (len <= (int)ft_strlen(token_word))
+// 		{
+// 			if(head->value[i] == '\"')
+// 			{
+// 				i++;
+// 				while (i <= (int)ft_strlen(head->value))
+// 				{
+// 					if(head->value[i] == '\"')
+// 					{
+// 						i++;
+// 						break;
+// 					}
+// 					if(head->value[i] == '$')
+// 					{
+// 						len_dollar = check_dollar(head->value,i + 1);
+// 						dollar = (char *)malloc(sizeof(char) * (len_dollar + 1));
+// 						dollar[len_dollar] = '\0';
+// 						len_dollar = 0;
+// 						i++;
+// 						while (dollar[len_dollar])
+// 						{
+// 							dollar[len_dollar] = head->value[i];
+// 							len_dollar++;
+// 							i++;
+// 						}
+// 						if(dollar)
+// 						{
+// 							dollar = ft_strdup(get_env(dollar));
+// 							j = 0;
+// 							while (dollar[j])
+// 							{
+// 								token_word[len] = dollar[j];
+// 								len++;
+// 								j++;
+// 							}
+// 							dollar = NULL;
+// 						}
+// 					}
+// 					else
+// 					{
+// 						token_word[len] = head->value[i];
+// 						len++;
+// 						i++;
+// 					}
+// 				}
+// 			}
+// 			else if(head->value[i] == '\'')
+// 			{
+// 				i++;
+// 				while (i <= (int)ft_strlen(head->value))
+// 				{
+// 					if(head->value[i] == '\'')
+// 					{
+// 						i++;
+// 						break;
+// 					}
+// 					token_word[len] = head->value[i];
+// 					len++;
+// 					i++;
+// 				}
+// 			}
+// 			else if(head->value[i] == '>' || head->value[i] == '<' || head->value[i] == '|' || head->value[i] == '$')
+// 			{
+// 				i++;
+// 				break;
+// 			}
+// 			else
+// 			{
+// 				token_word[len] = head->value[i];
+// 				i++;
+// 				len++;
+// 			}
+// 		}
+// 		i--;
+// 	}
+// }
+
+char	*word_double_couts(int *i,char *value, int *len,char *token_word)
+{
+	int len_dollar;
+	char *dollar;
+	int j;
+
+
+	len_dollar = 0;
+	dollar = NULL;
+	*i = *i + 1;
+	j = 0;
+	while (*i <= (int)ft_strlen(value))
+	{
+		if(value[*i] == '\"')
+		{
+			*i = *i + 1;
+			break;
+		}
+		if(value[*i] == '$')
+		{
+			len_dollar = check_dollar(value,*i + 1);
+			dollar = (char *)malloc(sizeof(char) * (len_dollar + 1));
+			dollar[len_dollar] = '\0';
+			len_dollar = 0;
+			*i = *i + 1;
+			while (dollar[len_dollar])
+			{
+				dollar[len_dollar] = value[*i];
+				len_dollar++;
+				*i = *i + 1;
+			}
+			if(dollar)
+			{
+				dollar = ft_strdup(get_env(dollar));
+				j = 0;
+				while (dollar[j])
+				{
+					token_word[*len] = dollar[j];
+					*len = *len + 1;
+					j++;
+				}
+				dollar = NULL;
+			}
+		}
+		else
+		{
+			token_word[*len] = value[*i];
+			*len = *len + 1;
+			*i = *i + 1;
+		}
+	}
+	return(token_word);
+}
+
+char *word_single_couts(int *i,char *value, int *len,char *token_word)
+{
+	*i = *i + 1;
+	while (*i <= (int)ft_strlen(value))
+	{
+		if(value[*i] == '\'')
+		{
+			*i = *i + 1;
+			break;
+		}
+		token_word[*len] = value[*i];
+		*len = *len + 1;
+		*i = *i + 1;
+	}
+	return(token_word);
+}
+
+char *dollar_token(int *i,char *dollar,char *value)
+{
+	int len_dollar;
+	int tmp;
+
+	tmp = 0;
+	len_dollar = check_dollar_word(value,*i + 1);
+	dollar = (char *)malloc(sizeof(char) * (len_dollar + 1));
+	dollar[len_dollar] = '\0';
+	tmp = len_dollar;
+	len_dollar = 0;
+	*i = *i + 1;
+	while (value[*i])
+	{
+		if(value[*i] == ' ' || value[*i] == '\"' || value[*i] == '\'' 
+		|| value[*i] == '|' || value[*i] == '>' || value[*i] == '<' 
+		|| value[*i] == '$')
+		{
+			*i = *i - 1;
+			break;
+		}
+		if(len_dollar <= tmp)
+			dollar[len_dollar] = value[*i];
+			len_dollar++;
+			*i = *i + 1;
+	}
+	return(dollar);
+}
+
+void	initialisation(int *i, int *len, char **token, char **token_word)
+{
+	*i = 0;
+	*len = 0;
+	*token = NULL;
+	*token_word = NULL;
+}
+
+void	insert_dividers(char *value,int *i,int *type)
+{
+	char *token;
+
+	token = NULL;
+	if(value[*i] && check_dividers(value[*i],type))
+	{
+		token = put_diveder(value,value[*i],i,type);
+		put_in_parcer(token,*type);
+		if(!value[*i + 1])
+			*i = *i + 1;
+	}
+}
+
+void	put_word(char **token_word,char *value, int *i,int *type)
+{
+	char *dollar;
+
+	dollar = NULL;
+	if(*token_word)
+	{
+		put_in_parcer(*token_word,10);
+		*token_word = NULL;
+	}
+	if(value[*i]=='$')
+	{
+		dollar = dollar_token(i,dollar,value);
+		if(dollar)
+		{
+			put_in_parcer(dollar,55);
+			dollar = NULL;
+		}
+	}
+	insert_dividers(value,i,type);
+}
+
+void	put_data_token(char **token_word, char *value, int *i)
+{
+	int len;
+
+	len = 0;
+	while (len <= (int)ft_strlen(*token_word))
+	{
+		if(value[*i] == '\"')
+			*token_word = word_double_couts(i,value,&len,*token_word);
+		else if(value[*i] == '\'')
+			*token_word = word_single_couts(i,value,&len,*token_word);
+		else if(value[*i] == '>' || value[*i] == '<' || value[*i] == '|' || value[*i] == '$')
+		{
+			*i = *i + 1;
+			break;
+		}
+		else
+		{
+			printf("len : %d\n",(int)ft_strlen(*token_word));
+			*token_word[len] = value[*i];
+			*i = *i + 1;
+			len++;
+		}
+	}
+}
+
 int    check_tokens(t_list *head, int error)
 {
 	int i;
 	int type;
-	char *token;
 	char *token_word;
 	int len;
-	int check;
 	int len_dollar;
 	char *dollar;
-	int j;
-	int tmp;
+	char *token;
 
 	i = 0;
-	check = 0;
 	token = NULL;
 	token_word = NULL;
 	len_dollar = 0;
 	dollar = NULL;
-	j = 0;
-	tmp = 0;
     while (head != NULL)
     {
-		i = 0;
-		len = 0;
-		token = NULL;
-		token_word = NULL;
+		initialisation(&i,&len,&token,&token_word);
 		while (i <= (int)ft_strlen(head->value))
 		{
 			len = len_word(head->value,i);
@@ -216,67 +461,13 @@ int    check_tokens(t_list *head, int error)
 				token_word = (char *)malloc(sizeof(char) * (len + 1));
 				token_word[len] = '\0';
 				len = 0;
+				//put_data_token(&token_word,head->value,&i);
 				while (len <= (int)ft_strlen(token_word))
 				{
 					if(head->value[i] == '\"')
-					{
-						i++;
-						while (i <= (int)ft_strlen(head->value))
-						{
-							if(head->value[i] == '\"')
-							{
-								i++;
-								break;
-							}
-							if(head->value[i] == '$')
-							{
-								len_dollar = check_dollar(head->value,i + 1);
-								dollar = (char *)malloc(sizeof(char) * (len_dollar + 1));
-								dollar[len_dollar] = '\0';
-								len_dollar = 0;
-								i++;
-								while (dollar[len_dollar])
-								{
-									dollar[len_dollar] = head->value[i];
-									len_dollar++;
-									i++;
-								}
-								if(dollar)
-								{
-									dollar = ft_strdup(get_env(dollar));
-									j = 0;
-									while (dollar[j])
-									{
-										token_word[len] = dollar[j];
-										len++;
-										j++;
-									}
-									dollar = NULL;
-								}
-							}
-							else
-							{
-								token_word[len] = head->value[i];
-								len++;
-								i++;
-							}
-						}
-					}
+						token_word = word_double_couts(&i, head->value,&len,token_word);
 					else if(head->value[i] == '\'')
-					{
-						i++;
-						while (i <= (int)ft_strlen(head->value))
-						{
-							if(head->value[i] == '\'')
-							{
-								i++;
-								break;
-							}
-							token_word[len] = head->value[i];
-							len++;
-							i++;
-						}
-					}
+						token_word = word_single_couts(&i, head->value,&len,token_word);
 					else if(head->value[i] == '>' || head->value[i] == '<' || head->value[i] == '|' || head->value[i] == '$')
 					{
 						i++;
@@ -291,43 +482,7 @@ int    check_tokens(t_list *head, int error)
 				}
 				i--;
 			}
-			if(token_word)
-			{
-				put_in_parcer(token_word,10);
-				token_word = NULL;
-			}
-			if(head->value[i]=='$')
-			{
-				len_dollar = check_dollar_word(head->value,i + 1);
-				dollar = (char *)malloc(sizeof(char) * (len_dollar + 1));
-				dollar[len_dollar] = '\0';
-				tmp = len_dollar;
-				len_dollar = 0;
-				i++;
-				while (head->value[i])
-				{
-					if(head->value[i] == ' ' || head->value[i] == '\"' || head->value[i] == '\'' 
-					|| head->value[i] == '|' || head->value[i] == '>' || head->value[i] == '<' 
-					|| head->value[i] == '$')
-					{
-						i--;
-						break;
-					}
-					if(len_dollar <= tmp)
-						dollar[len_dollar] = head->value[i];
-					len_dollar++;
-					i++;
-				}
-				put_in_parcer(dollar,55);
-				dollar = NULL;
-			}
-			if(head->value[i] && check_dividers(head->value[i],&type))
-			{
-				token = put_diveder(head->value,head->value[i],&i,&type);
-				put_in_parcer(token,type);
-				if(!head->value[i + 1])
-					i++;
-			}
+			put_word(&token_word,head->value,&i,&type);
 			i++;
 		}
         head = head->next;
