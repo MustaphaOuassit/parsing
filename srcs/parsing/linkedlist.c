@@ -85,7 +85,7 @@ int		check_dollar(char *value, int start)
 	len = 0;
 	while (value[start])
 	{
-		if (value[start] == ' ' || value[start] == '\"')
+		if (value[start] == ' ' || value[start] == '\"' || value[start] == '$')
 			break;
 		len++;
 		start++;
@@ -111,16 +111,13 @@ int		len_word(char *value, int start)
 	close = 0;
 	dollar = NULL;
 	len_dollar = 0;
-	while (value[start])
+	while (start < (int)ft_strlen(value))
 	{
-		if(value[start] == '|' || value[start] == '>' || value[start] == '<' || value[start] == '$')
+		if(value[start] == '|' || value[start] == '>' || value[start] == '<')
 			break;
 		if (value[start] == '\"')
 		{
 			start++;
-			// close = check_close(value, start);
-			// if(!close)
-			// 	return(-1);
 			while (value[start])
 			{
 				if(value[start] == '\"')
@@ -138,11 +135,11 @@ int		len_word(char *value, int start)
 						len_dollar++;
 						start++;
 					}
-					start--;
 					if(dollar)
 					{
 						i = i + (int)ft_strlen(get_env(dollar));
 						i--;
+						start--;
 					}
 				}
 				i++;
@@ -152,9 +149,6 @@ int		len_word(char *value, int start)
 		else if (value[start] == '\'')
 		{
 			start++;
-			// close = check_close(value, start);
-			// if(!close)
-			// 	return(-1);
 			while (value[start])
 			{
 				if(value[start] == '\'')
@@ -178,11 +172,17 @@ int    check_tokens(t_list *head, int error)
 	char *token_word;
 	int len;
 	int check;
+	int len_dollar;
+	char *dollar;
+	int j;
 
 	i = 0;
 	check = 0;
 	token = NULL;
 	token_word = NULL;
+	len_dollar = 0;
+	dollar = NULL;
+	j = 0;
     while (head != NULL)
     {
 		i = 0;
@@ -192,6 +192,7 @@ int    check_tokens(t_list *head, int error)
 		while (i <= (int)ft_strlen(head->value))
 		{
 			len = len_word(head->value,i);
+			printf("%d\n",len);
 			if(len)
 			{
 				token_word = (char *)malloc(sizeof(char) * (len + 1));
@@ -205,14 +206,63 @@ int    check_tokens(t_list *head, int error)
 						while (i <= (int)ft_strlen(head->value))
 						{
 							if(head->value[i] == '\"')
+							{
+								i++;
 								break;
+							}
+							if(head->value[i] == '$')
+							{
+								len_dollar = check_dollar(head->value,i + 1);
+								dollar = (char *)malloc(sizeof(char) * (len_dollar + 1));
+								dollar[len_dollar] = '\0';
+								len_dollar = 0;
+								i++;
+								while (dollar[len_dollar])
+								{
+									dollar[len_dollar] = head->value[i];
+									len_dollar++;
+									i++;
+								}
+								if(dollar)
+								{
+									dollar = ft_strdup(get_env(dollar));
+									j = 0;
+									while (dollar[j])
+									{
+										token_word[len] = dollar[j];
+										len++;
+										j++;
+									}
+								}
+							}
+							else
+							{
+								token_word[len] = head->value[i];
+								len++;
+								i++;
+							}
+						}
+					}
+					else if(head->value[i] == '\'')
+					{
+						i++;
+						while (i <= (int)ft_strlen(head->value))
+						{
+							if(head->value[i] == '\'')
+							{
+								i++;
+								break;
+							}
 							token_word[len] = head->value[i];
 							len++;
 							i++;
 						}
 					}
-					else if(head->value[i] == '>')
+					else if(head->value[i] == '>' || head->value[i] == '<' || head->value[i] == '|')
+					{
+						i++;
 						break;
+					}
 					else
 					{
 						token_word[len] = head->value[i];
@@ -228,6 +278,8 @@ int    check_tokens(t_list *head, int error)
 					put_in_parcer(token_word,10);
 				token = put_diveder(head->value,head->value[i],&i,&type);
 				put_in_parcer(token,type);
+				if(!head->value[i + 1])
+					i++;
 			}
 			else if(token_word)
 				put_in_parcer(token_word,10);

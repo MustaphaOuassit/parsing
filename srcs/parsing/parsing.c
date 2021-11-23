@@ -27,11 +27,11 @@ int     skip_spaces(char *cmd)
     return(i);
 }
 
-int check_close(char *value, int i)
+int check_close(char *value, int i, int ele)
 {
     while (value[i])
     {
-        if(value[i] == '\"')
+        if(value[i] == ele)
             return(1);
         i++;
     }
@@ -52,7 +52,7 @@ int len_token(char *cmd, int start)
         if(cmd[i] == '\"')
         {
             i++;
-            close = check_close(cmd, i);
+            close = check_close(cmd, i,'\"');
 			if(!close)
             {
                 len = -1;
@@ -62,6 +62,24 @@ int len_token(char *cmd, int start)
             while (cmd[i])
             {
                 if(cmd[i] == '\"')
+                    break;
+                len++;
+                i++;
+            }
+        }
+        else if(cmd[i] == '\'')
+        {
+            i++;
+            close = check_close(cmd, i,'\'');
+			if(!close)
+            {
+                len = -1;
+                return(len);
+            }
+            len++;
+            while (cmd[i])
+            {
+                if(cmd[i] == '\'')
                     break;
                 len++;
                 i++;
