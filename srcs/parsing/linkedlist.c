@@ -38,10 +38,8 @@ int	check_dividers(int value, int *type)
 	{
 		if (value == '|')
 			*type = 1;
-		if(value == '>')
+		else
 			*type = 2;
-		if(value == '<')
-			*type = 3;
 		return(1);
 		
 	}
@@ -61,13 +59,13 @@ char	*put_diveder(char *data, int value, int *i,int *type)
 	if((value == '>' && data[*i + 1] && data[*i + 1] == '>'))
 	{
 		token = ft_strdup(">>");
-		*type = 4;
+		*type = 2;
 		*i = *i + 1;
 	}
 	else if((value == '<' && data[*i + 1] && data[*i + 1] == '<'))
 	{
 		token = ft_strdup("<<");
-		*type = 5;
+		*type = 2;
 		*i = *i + 1;
 	}
 	else
@@ -348,7 +346,7 @@ void	put_word(char **token_word,char *value, int *i,int *type)
 	dollar = NULL;
 	if(*token_word)
 	{
-		put_in_parcer(*token_word,10);
+		put_in_parcer(*token_word,4);
 		*token_word = NULL;
 	}
 	if(value[*i]=='$')
@@ -356,7 +354,7 @@ void	put_word(char **token_word,char *value, int *i,int *type)
 		dollar = dollar_token(i,dollar,value);
 		if(dollar)
 		{
-			put_in_parcer(dollar,55);
+			put_in_parcer(dollar,3);
 			dollar = NULL;
 		}
 	}

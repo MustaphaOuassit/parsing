@@ -100,6 +100,13 @@ void	ft_exit();
 
 //parsing
 
+/*
+	pipe : 1;
+	redirections : 2;
+	$ : 3
+	word : 4
+*/
+
 void    parsing(char *cmd, int *error);
 int    list_tokens(t_list **head, char *data);
 int    check_tokens(t_list *head, int error);
