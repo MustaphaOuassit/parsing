@@ -52,6 +52,17 @@ typedef		struct s_list{
 	struct s_list *next;
 }		t_list;
 
+typedef		struct s_init{
+	int type;
+	char *token_word;
+	int len;
+	int close;
+	int i;
+	int len_dollar;
+	char *dollar;
+	char *token;
+}		t_init;
+
 typedef		struct s_redirection{
 	char	*file_name;
 	int		type;

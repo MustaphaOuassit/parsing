@@ -38,59 +38,73 @@ int check_close(char *value, int i, int ele)
     return(0);
 }
 
+int   check_double_couts(char *value, int *i, int *len, int *close)
+{
+    *i = *i + 1;
+    *close = check_close(value, *i,'\"');
+	if(!*close)
+    {
+        *len = -1;
+        return(*len);
+    }
+    *len = *len + 1;
+    while (value[*i])
+    {
+        if(value[*i] == '\"')
+            break;
+        *len = *len + 1;
+        *i = *i + 1;
+    }
+    return(*len);
+}
+
+int check_single_couts(char *value, int *i, int *len, int *close)
+{
+    *i = *i + 1;
+    *close = check_close(value, *i,'\'');
+	if(!*close)
+    {
+        *len = -1;
+        return(*len);
+    }
+    *len = *len + 1;
+    while (value[*i])
+    {
+        if(value[*i] == '\'')
+            break;
+        *len = *len + 1;
+        *i = *i + 1;
+    }
+    return(*len);
+}
+
 int len_token(char *cmd, int start)
 {
-    int i;
-    int len;
-    int close;
+    t_init var;
 
-    i = start;
-    len = 0;
-    close = 0;
-    while (cmd[i])
+    var.i = start;
+    var.len = 0;
+    var.close = 0;
+    while (cmd[var.i])
     {
-        if(cmd[i] == '\"')
+        if(cmd[var.i] == '\"')
         {
-            i++;
-            close = check_close(cmd, i,'\"');
-			if(!close)
-            {
-                len = -1;
-                return(len);
-            }
-            len++;
-            while (cmd[i])
-            {
-                if(cmd[i] == '\"')
-                    break;
-                len++;
-                i++;
-            }
+            var.len = check_double_couts(cmd, &var.i, &var.len, &var.close);
+            if(var.len == -1)
+                return(var.len);
         }
-        else if(cmd[i] == '\'')
+        else if(cmd[var.i] == '\'')
         {
-            i++;
-            close = check_close(cmd, i,'\'');
-			if(!close)
-            {
-                len = -1;
-                return(len);
-            }
-            len++;
-            while (cmd[i])
-            {
-                if(cmd[i] == '\'')
-                    break;
-                len++;
-                i++;
-            }
+            var.len = check_single_couts(cmd, &var.i,&var.len,&var.close);
+            if(var.len == -1)
+                return(var.len);
         }
-        i++;
-        len++;
-        if(cmd[i] == ' ')
+        var.i++;
+        var.len++;
+        if(cmd[var.i] == ' ')
             break;
     }
-   return(len); 
+   return(var.len); 
 }
 
 char     *get_token(char *cmd, int *start)
@@ -142,8 +156,6 @@ void    parsing(char *cmd, int *error)
         start++;
     }
     if(*error != -1)
-    {
         *error = check_tokens(head,*error);
-    }
     *error = 1;
 }
