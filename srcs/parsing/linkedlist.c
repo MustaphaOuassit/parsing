@@ -219,6 +219,7 @@ int		len_word(char *value, int start)
 		{
 			start++;
 			skip_string(value,&start,&var.i,&var.len_dollar);
+			var.i = var.i + 2;
 		}
 		else
 			single_couts(value,&start,&var.i);
@@ -281,13 +282,28 @@ char	*word_double_couts(int *i,char *value, int *len,char *token_word)
 	{
 		if(value[*i] == '\"')
 		{
+			token_word[*len] = value[*i];
+			*len = *len + 1;
 			*i = *i + 1;
 			break;
 		}
 		if(value[*i] == '$')
+		{
+			if(value[*i - 1] == '\"')
+			{
+				token_word[*len] = value[*i - 1];
+				*len = *len + 1;
+			}
 			token_word = dollar_value(token_word,value,len,i);
+		}
 		else
 		{
+			if(value[*i - 1] == '\"')
+			{
+				token_word[*len] = value[*i - 1];
+				*len = *len + 1;
+			}
+
 			token_word[*len] = value[*i];
 			*len = *len + 1;
 			*i = *i + 1;
