@@ -46,9 +46,29 @@ int	check_dividers(int value, int *type)
 	return(0);
 }
 
-void	put_in_parcer(char *value, int type)
+int	put_in_parcer(t_tokens **head, char *value, int type)
 {
-	printf("V : %s T : %d\n",value,type);
+	char *tmp;
+
+	tmp = ft_strdup(value);
+	t_tokens *new_node = malloc(sizeof(t_tokens));
+	t_tokens *line;
+	 line = *head;
+	new_node->value = tmp;
+	new_node->type = type;
+	new_node->next = NULL;
+	if(*head == NULL)
+	{
+		*head = new_node;
+		return(0);
+	}
+
+	while (line->next != NULL)
+	{	
+		line = line->next;
+	}
+	line->next = new_node;
+return(0);
 }
 
 char	*put_diveder(char *data, int value, int *i,int *type)
@@ -188,12 +208,32 @@ int		len_word(char *value, int start)
 	while (start < (int)ft_strlen(value))
 	{
 		if(value[start] == '|' || value[start] == '>' ||
-		value[start] == '<' || value[start] == '$')
+		value[start] == '<')
 			break;
 		if (value[start] == '\"')
 		{
 			start++;
 			skip_string(value,&start,&var.i,&var.len_dollar);
+		}
+		else if(value[start] == '$')
+		{
+			var.dollar = NULL;
+			var.len_dollar = check_dollar(value,start + 1);
+			var.dollar = (char *)malloc(sizeof(char) * (var.len_dollar + 1));
+			var.dollar[var.len_dollar] = '\0';
+			var.len_dollar = 0;
+			start++;
+			while (var.dollar[var.len_dollar])
+			{
+				var.dollar[var.len_dollar] = value[start];
+				var.len_dollar++;
+				start++;
+			}
+			if(var.dollar)
+			{
+				var.i = var.i + (int)ft_strlen(get_env(var.dollar));
+				start--;
+			}
 		}
 		else
 			single_couts(value,&start,&var.i);
@@ -325,40 +365,43 @@ void	initialisation(int *i, int *len, char **token, char **token_word)
 	*token_word = NULL;
 }
 
-void	insert_dividers(char *value,int *i,int *type)
+void	insert_dividers(t_tokens **data,char *value,int *i)
 {
 	char *token;
+	int type;
 
 	token = NULL;
-	if(value[*i] && check_dividers(value[*i],type))
+	type = 0;
+	if(value[*i] && check_dividers(value[*i],&type))
 	{
-		token = put_diveder(value,value[*i],i,type);
-		put_in_parcer(token,*type);
+		token = put_diveder(value,value[*i],i,&type);
+		put_in_parcer(data,token,type);
 		if(!value[*i + 1])
 			*i = *i + 1;
 	}
 }
 
-void	put_word(char **token_word,char *value, int *i,int *type)
+void	put_word(t_tokens **data, char **token_word,char *value, int *i)
 {
 	char *dollar;
 
 	dollar = NULL;
 	if(*token_word)
 	{
-		put_in_parcer(*token_word,4);
+		put_in_parcer(data,*token_word,4);
 		*token_word = NULL;
 	}
+	//test
 	if(value[*i]=='$')
 	{
 		dollar = dollar_token(i,dollar,value);
 		if(dollar)
 		{
-			put_in_parcer(dollar,3);
+			put_in_parcer(data,dollar,3);
 			dollar = NULL;
 		}
 	}
-	insert_dividers(value,i,type);
+	insert_dividers(data,value,i);
 }
 
 char	*initialisation_token(int *len)
@@ -384,13 +427,18 @@ char *put_data_token(int *len, char *value, int *i)
 		else if(value[*i] == '\'')
 		token_word = word_single_couts(i, value,len,token_word);
 		else if(value[*i] == '>' || value[*i] == '<' ||
-		value[*i] == '|' || value[*i] == '$')
+		value[*i] == '|')
 		{
 			*i = *i + 1;
 			break;
 		}
 		else
 		{
+			if(value[*i] == '$')
+			{
+				token_word = dollar_value(token_word,value,len,i);
+			}
+			else
 			token_word[*len] = value[*i];
 			*i = *i + 1;
 			*len = *len + 1;
@@ -407,12 +455,24 @@ void initialisation_init(char **token, char **token_word,int *len_dollar,char **
 	*dollar = NULL;
 }
 
+void	fill_data(t_tokens *data)
+{
+	while (data != NULL)
+	{
+		printf("%s - %d\n",data->value,data->type);
+		data = data->next;
+	}
+	
+}
+
 int    check_tokens(t_list *head, int error)
 {
 	t_init var;
+	t_tokens *data;
 	int i;
 
 	i = 0;
+	data = NULL;
 	var.type = 0;
 	var.len = 0;
 	initialisation_init(&var.token,&var.token_word,&var.len_dollar,&var.dollar);
@@ -424,11 +484,12 @@ int    check_tokens(t_list *head, int error)
 			var.len = len_word(head->value,i);
 			if(var.len)
 				var.token_word = put_data_token(&var.len, head->value,&i);
-			put_word(&var.token_word,head->value,&i,&var.type);
+			put_word(&data,&var.token_word,head->value,&i);
 			i++;
 		}
         head = head->next;
     }
+	fill_data(data);
     error = 2;
 	return(error);
 }
