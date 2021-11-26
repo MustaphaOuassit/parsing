@@ -101,10 +101,12 @@ void	ft_exit();
 //parsing
 
 /*
-	pipe : 1;
-	redirections : 2;
-	$ : 3
-	word : 4
+	| : 1;
+	> : 2;
+	>> : 3;
+	< : 4;
+	<< : 5;
+	word : 6;
 */
 
 void    parsing(char *cmd, int *error);

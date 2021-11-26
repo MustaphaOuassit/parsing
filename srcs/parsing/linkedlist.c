@@ -38,8 +38,10 @@ int	check_dividers(int value, int *type)
 	{
 		if (value == '|')
 			*type = 1;
-		else
+		if(value == '>')
 			*type = 2;
+		if(value == '<')
+			*type = 4;
 		return(1);
 		
 	}
@@ -59,13 +61,13 @@ char	*put_diveder(char *data, int value, int *i,int *type)
 	if((value == '>' && data[*i + 1] && data[*i + 1] == '>'))
 	{
 		token = ft_strdup(">>");
-		*type = 2;
+		*type = 3;
 		*i = *i + 1;
 	}
 	else if((value == '<' && data[*i + 1] && data[*i + 1] == '<'))
 	{
 		token = ft_strdup("<<");
-		*type = 2;
+		*type = 5;
 		*i = *i + 1;
 	}
 	else
@@ -83,7 +85,9 @@ int		check_dollar(char *value, int start)
 	len = 0;
 	while (value[start])
 	{
-		if (value[start] == ' ' || value[start] == '\"' || value[start] == '\'' || value[start] == '$' || value[start] == '>' || value[start] == '|')
+		if (value[start] == ' ' || value[start] == '\"' || value[start] == '\'' ||
+		value[start] == '$' || value[start] == '>' || value[start] == '|'
+		|| value[start] == '<')
 			break;
 		len++;
 		start++;
@@ -411,17 +415,8 @@ void	put_word(char **token_word,char *value, int *i,int *type)
 	dollar = NULL;
 	if(*token_word)
 	{
-		put_in_parcer(*token_word,4);
+		put_in_parcer(*token_word,6);
 		*token_word = NULL;
-	}
-	if(value[*i]=='$')
-	{
-		dollar = dollar_token(i,dollar,value);
-		if(dollar)
-		{
-			put_in_parcer(dollar,3);
-			dollar = NULL;
-		}
 	}
 	insert_dividers(value,i,type);
 }
@@ -512,9 +507,11 @@ void initialisation_init(char **token, char **token_word,int *len_dollar,char **
 int    check_tokens(t_list *head, int error)
 {
 	t_init var;
+	t_tokens *data;
 	int i;
 
 	i = 0;
+	data = NULL;
 	var.type = 0;
 	var.len = 0;
 	initialisation_init(&var.token,&var.token_word,&var.len_dollar,&var.dollar);
