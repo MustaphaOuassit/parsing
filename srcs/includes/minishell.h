@@ -76,6 +76,11 @@ typedef		struct s_data{
 	struct s_data *next;
 }		t_data;
 
+typedef		struct s_args{
+	char	**arguments;
+	struct	s_args *next;
+}			t_args;
+
 //exec
 void	ft_builtins(t_data *data, t_envp **env_list);
 int		is_builtin(char *cmd);
