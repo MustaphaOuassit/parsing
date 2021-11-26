@@ -16,6 +16,7 @@ NAME = minishell
 SRC =./srcs/main.c \
 	  ./srcs/parsing/parsing.c \
 	  ./srcs/parsing/linkedlist.c \
+	  ./srcs/parsing/fill_data.c \
 	  ./srcs/execution/ft_exit_bi.c \
 	  ./srcs/execution/free_struct.c \
 	  ./srcs/execution/ft_unset.c \

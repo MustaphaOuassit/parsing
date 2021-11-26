@@ -112,5 +112,6 @@ void	ft_exit();
 void    parsing(char *cmd, int *error);
 int    list_tokens(t_list **head, char *data);
 int    check_tokens(t_list *head, int error);
+int     fill_data(t_tokens *tokones);
 
 #endif

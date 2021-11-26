@@ -48,9 +48,29 @@ int	check_dividers(int value, int *type)
 	return(0);
 }
 
-void	put_in_parcer(char *value, int type)
+int	put_in_parcer(t_tokens **head, char *value, int type)
 {
-	printf("V : %s T : %d\n",value,type);
+	char *tmp;
+
+	tmp = ft_strdup(value);
+	t_tokens *new_node = malloc(sizeof(t_tokens));
+	t_tokens *line;
+	 line = *head;
+	new_node->value = tmp;
+	new_node->type = type;
+	new_node->next = NULL;
+	if(*head == NULL)
+	{
+		*head = new_node;
+		return(0);
+	}
+
+	while (line->next != NULL)
+	{	
+		line = line->next;
+	}
+	line->next = new_node;
+return(0);
 }
 
 char	*put_diveder(char *data, int value, int *i,int *type)
@@ -394,33 +414,6 @@ void	initialisation(int *i, int *len, char **token, char **token_word)
 	*token_word = NULL;
 }
 
-void	insert_dividers(char *value,int *i,int *type)
-{
-	char *token;
-
-	token = NULL;
-	if(value[*i] && check_dividers(value[*i],type))
-	{
-		token = put_diveder(value,value[*i],i,type);
-		put_in_parcer(token,*type);
-		if(!value[*i + 1])
-			*i = *i + 1;
-	}
-}
-
-void	put_word(char **token_word,char *value, int *i,int *type)
-{
-	char *dollar;
-
-	dollar = NULL;
-	if(*token_word)
-	{
-		put_in_parcer(*token_word,6);
-		*token_word = NULL;
-	}
-	insert_dividers(value,i,type);
-}
-
 char	*initialisation_token(int *len)
 {
 	char *token_word;
@@ -504,6 +497,32 @@ void initialisation_init(char **token, char **token_word,int *len_dollar,char **
 	*dollar = NULL;
 }
 
+void	put_word(t_tokens **data ,char **token_word)
+{
+	char *dollar;
+
+	dollar = NULL;
+	if(*token_word)
+	{
+		put_in_parcer(data,*token_word,6);
+		*token_word = NULL;
+	}
+}
+
+void	insert_dividers(t_tokens **data ,char *value,int *i,int *type)
+{
+	char *token;
+
+	token = NULL;
+	if(value[*i] && check_dividers(value[*i],type))
+	{
+		token = put_diveder(value,value[*i],i,type);
+		put_in_parcer(data,token,*type);
+		if(!value[*i + 1])
+			*i = *i + 1;
+	}
+}
+
 int    check_tokens(t_list *head, int error)
 {
 	t_init var;
@@ -523,11 +542,12 @@ int    check_tokens(t_list *head, int error)
 			var.len = len_word(head->value,i);
 			if(var.len)
 				var.token_word = put_data_token(&var.len, head->value,&i);
-			put_word(&var.token_word,head->value,&i,&var.type);
+			put_word(&data,&var.token_word);
+			insert_dividers(&data,head->value,&i,&var.type);
 			i++;
 		}
         head = head->next;
     }
-    error = 2;
+	error = fill_data(data);
 	return(error);
 }
