@@ -35,6 +35,27 @@ int	redirection_token(t_redirection	**head,int type, char *file_name)
     return(0);  
 }
 
+int	args_token(t_args	**head, char *args)
+{
+	t_args *new_node = malloc(sizeof(t_redirection));
+	t_args *line;
+
+	line = *head;
+	new_node->arguments = args;
+	new_node->next = NULL;
+	if(*head == NULL)
+	{
+		*head = new_node;
+		return(0);
+	}
+	while (line->next != NULL)
+	{
+		line = line->next;
+	}
+	line->next = new_node;
+    return(0);  
+}
+
 char	*convert(char *value)
 {
 	char *error;
@@ -97,9 +118,11 @@ int		get_len_double(char *value)
 {
 	int i;
 	int len;
+	int check;
 
 	i = 0;
 	len = 0;
+	check=0;
 	while (i <= (int)ft_strlen(value))
 	{
 		if(value[i] == '\"' )
@@ -112,35 +135,58 @@ int		get_allocation(char *value)
 {
 	int i;
 	int len;
+	int	r;
+	int	check;
+	char **split;
 
 	i = 0;
 	len = 0;
-	while (i <= (int)ft_strlen(value))
+	r = 0;
+	check = 0;
+	split = ft_split(value,' ');
+	printf("|%s|\n",value);
+	while (split[i])
 	{
-		if(value[i] == ' ' )
+		printf("%s\n",split[i]);
+		r = 0;
+		while (r <= (int)ft_strlen(split[i]))
 		{
-			i++;
-			while (value[i])
+			check = 0;
+			if(split[i][r] == '\"')
 			{
-				if(value[i] != ' ')
+				r++;
+				while (split[i][r])
 				{
-					len++;
-					break;
+					if(split[i][r] == '\"')
+					{
+						len--;
+						check = 1;
+						break;
+					}
+					r++;
 				}
-				i++;
+				if(check == 0)
+				{
+					i++;
+					while (split[i])
+					{
+						if(split[i][(int)ft_strlen(split[i]) - 1] == '\"')
+							break;
+						i++;
+					}	
+				}
 			}
+			else
+				break;
+			r++;
 		}
-		else if(value[i] == '\"' )
-		{
-			i++;
-			while (value[i] != '\"')
-				i++;
-		}
+		len++;
 		i++;
 	}
 	if(len == 0)
 		len = 1;
-	return(len);
+	printf("%d\n",len);
+	return(0);
 }
 
 int		len_args(char *value ,int *start)
@@ -232,8 +278,30 @@ char  **filter_args(char *value)
 			r++;
 			j++;
 		}
+		filter[len] = 0;
 	}
 	return(filter);
+}
+
+int	all_data(t_data	**head, char **arguments)
+{
+	t_data *new_node = malloc(sizeof(t_data));
+	t_data *line;
+
+	line = *head;
+	new_node->arguments = arguments;
+	new_node->next = NULL;
+	if(*head == NULL)
+	{
+		*head = new_node;
+		return(0);
+	}
+	while (line->next != NULL)
+	{
+		line = line->next;
+	}
+	line->next = new_node;
+    return(0);  
 }
 
 int     fill_data(t_tokens *tokens)
@@ -242,50 +310,80 @@ int     fill_data(t_tokens *tokens)
     t_args *args;
 	int		check;
 	int		type;
+	int len;
 	int 	j;
+	int t;
 	char **filter;
+	t_data *data;
+	char **arguments;
 
     rdt = NULL;
     args = NULL;
+	data = NULL;
+	filter = NULL;
+	arguments = NULL;
 	check = 0;
+	len = 0;
 	j = 0;
+	t = 0;
     while (tokens != NULL)
     {
-		if( tokens->type <= 5 && tokens->type >= 2)
+		if(tokens->type == 1)
 		{
-			if(error_redirection(check, tokens))
-				return(1);
-			check = 1;
-			type = tokens->type;
-		}
-		else if(check == 1)
-		{
-			check = 0;
-			redirection_token(&rdt,type,tokens->value);
+			// arguments = (char **)malloc(sizeof(char *) * (len + 1));
+			// t = 0;
+			// while (args != NULL)
+			// {
+			// 	arguments[t] = args->arguments;
+			// 	t++;
+			// 	args = args->next;
+			// }
+			// arguments[len] = 0;
+			// all_data(&data,arguments);
+			// len = 0;
+			// tokens = tokens->next;
 		}
 		else
 		{
-			filter = filter_args(tokens->value);
-			if(filter)
+			if( tokens->type <= 5 && tokens->type >= 2)
 			{
-				j = 0;
-				while (filter[j])
-				{
-					printf("**%s**\n",filter[j]);
-					j++;
-				}
-				
+				if(error_redirection(check, tokens))
+					return(1);
+				check = 1;
+				type = tokens->type;
 			}
+			else if(check == 1)
+			{
+				check = 0;
+				redirection_token(&rdt,type,tokens->value);
+			}
+			else
+			{
+				filter = filter_args(tokens->value);
+				if(filter)
+				{
+					j = 0;
+					while (filter[j])
+					{
+						args_token(&args,filter[j]);
+						len++;
+						j++;
+					}
+				}
+			}
+        	tokens = tokens->next;
 		}
-        tokens = tokens->next;
     }
-
-	while (rdt != NULL)
-	{
-		printf("%d %s\n",rdt->type,rdt->file_name);
-		rdt = rdt->next;
-	}
+	// while (data != NULL)
+	// {
+	// 	j = 0;
+	// 	while (data->arguments[j])
+	// 	{
+	// 		printf("%s\n",data->arguments[j]);
+	// 		j++;
+	// 	}
+	// 	data = data->next;
+	// }
 	
-    
     return(0);
 }

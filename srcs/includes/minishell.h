@@ -77,7 +77,7 @@ typedef		struct s_data{
 }		t_data;
 
 typedef		struct s_args{
-	char	**arguments;
+	char	*arguments;
 	struct	s_args *next;
 }			t_args;
 
