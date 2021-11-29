@@ -70,8 +70,8 @@ typedef		struct s_redirection{
 }			t_redirection;
 
 typedef		struct s_data{
-	t_tokens	**line_cmd;
 	char	**arguments;
+	int		nb_heredoc;
 	t_redirection *redirection;
 	struct s_data *next;
 }		t_data;

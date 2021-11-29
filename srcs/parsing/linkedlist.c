@@ -135,7 +135,7 @@ int		check_dollar_word(char *value, int start)
 char	*get_env(char *value)
 {
 	value[0] = 'd';
-	char *str = ft_strdup("   ls -la ");
+	char *str = ft_strdup("ls -la");
 	return(str);
 }
 
