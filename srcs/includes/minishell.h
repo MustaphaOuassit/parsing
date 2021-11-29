@@ -47,6 +47,11 @@ typedef		struct s_tokens{
 	struct s_tokens *next;
 }		t_tokens;
 
+typedef		struct s_test{
+	int		a;
+	int		b;
+}		t_test;
+
 typedef		struct s_list{
 	char	*value;
 	struct s_list *next;
@@ -114,9 +119,9 @@ void	ft_exit();
 	word : 6;
 */
 
-void    parsing(char *cmd, int *error);
+void    parsing(char *cmd, int *error,t_envp *env_list);
 int    list_tokens(t_list **head, char *data);
-int    check_tokens(t_list *head, int error);
-int     fill_data(t_tokens *tokones);
+int    check_tokens(t_list *head, int error,t_envp *env_list);
+int     fill_data(t_tokens *tokens);
 
 #endif

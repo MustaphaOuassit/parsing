@@ -132,6 +132,37 @@ int		check_dollar_word(char *value, int start)
 	return(len);
 }
 
+char	*get_env_vf(char *value, t_envp *env_list)
+{
+	char *dollar;
+	int		i;
+	int		j;
+
+	i = 0;
+	j = 0;
+	dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 2));
+	dollar[(int)ft_strlen(value) + 1] = '\0';
+	while (dollar[i])
+	{
+		if(i == 0)
+			dollar[i] = '$';
+		else
+		{
+			dollar[i] = value[j];
+			j++;
+		}
+		i++;
+	}
+	printf("--%s\n",dollar);
+	while (env_list != NULL)
+	{
+		if(!ft_strcmp(env_list->key,value))
+			return(env_list->value);
+		env_list = env_list->next;
+	}
+	return("ls -la");
+}
+
 char	*get_env(char *value)
 {
 	value[0] = 'd';
@@ -139,26 +170,26 @@ char	*get_env(char *value)
 	return(str);
 }
 
-void	take_dollar(char *value, int *start, int *len_dollar, int *i)
+void	take_dollar(char *value, int *start, t_init *var,t_envp *env_list)
 {
 	char *dollar;
 
 	dollar = NULL;
-	*len_dollar = check_dollar(value,*start + 1);
-	dollar = (char *)malloc(sizeof(char) * (*len_dollar + 1));
-	dollar[*len_dollar] = '\0';
-	*len_dollar = 0;
+	var->len_dollar = check_dollar(value,*start + 1);
+	dollar = (char *)malloc(sizeof(char) * (var->len_dollar + 1));
+	dollar[var->len_dollar] = '\0';
+	var->len_dollar = 0;
 	*start = *start + 1;
-	while (dollar[*len_dollar])
+	while (dollar[var->len_dollar])
 	{
-		dollar[*len_dollar] = value[*start];
-		*len_dollar = *len_dollar + 1;
+		dollar[var->len_dollar] = value[*start];
+		var->len_dollar = var->len_dollar + 1;
 		*start = *start + 1;
 	}
 	if(dollar)
 	{
-		*i = *i + (int)ft_strlen(get_env(dollar));
-		*i = *i - 1;
+		var->i = var->i + (int)ft_strlen(get_env_vf(dollar,env_list));
+		var->i = var->i - 1;
 		*start = *start - 1;
 	}
 }
@@ -183,7 +214,7 @@ void	initialisation_var(int *i, int *close, char **dollar, int *len_dollar)
 	*len_dollar = 0;
 }
 
-void	dollar_manipulation(char *value,int *start, int *i)
+void	dollar_manipulation(char *value,int *start, int *i,t_envp *env_list)
 {
 	t_init var;
 	*i = *i + 1;
@@ -201,7 +232,7 @@ void	dollar_manipulation(char *value,int *start, int *i)
 	}
 	if(var.dollar)
 	{
-		*i = *i + (int)ft_strlen(get_env(var.dollar));
+		*i = *i + (int)ft_strlen(get_env_vf(var.dollar,env_list));
 		*i = *i - 1;
 		*start = *start - 1;
 	}
@@ -219,30 +250,30 @@ int	delimiter(char *value, int *start)
 	return(0);
 }
 
-void	single_couts(char *value, int *start, int *i)
+void	single_couts(char *value, int *start, int *i, t_envp *env_list)
 {
 	if (value[*start] == '\'')
 		take_couts(start,value,i);
 	else if(value[*start] == '$' && delimiter(value, start))
-		dollar_manipulation(value,start,i);
+		dollar_manipulation(value,start,i,env_list);
 	else
 		*i = *i + 1;
 }
 
-void	skip_string(char *value, int *start, int *i, int *len_dollar)
+void	skip_string(char *value, int *start,t_init *var,t_envp *env_list)
 {
 	while (value[*start])
 	{
 		if(value[*start] == '\"')
 			break;
 		if(value[*start] == '$' && delimiter(value,start))
-			take_dollar(value, start, len_dollar,i);
-		*i = *i + 1;
+			take_dollar(value, start,var,env_list);
+		var->i++;
 		*start = *start + 1;
 	}
 }
 
-int		len_word(char *value, int start)
+int		len_word(char *value, int start, t_envp *env_list)
 {
 	t_init var;
 
@@ -255,11 +286,11 @@ int		len_word(char *value, int start)
 		if (value[start] == '\"')
 		{
 			start++;
-			skip_string(value,&start,&var.i,&var.len_dollar);
+			skip_string(value,&start,&var,env_list);
 			var.i = var.i + 2;
 		}
 		else
-			single_couts(value,&start,&var.i);
+			single_couts(value,&start,&var.i,env_list);
 		start++;
 	}
 	return(var.i);
@@ -523,7 +554,7 @@ void	insert_dividers(t_tokens **data ,char *value,int *i,int *type)
 	}
 }
 
-int    check_tokens(t_list *head, int error)
+int    check_tokens(t_list *head, int error,t_envp *env_list)
 {
 	t_init var;
 	t_tokens *data;
@@ -539,7 +570,7 @@ int    check_tokens(t_list *head, int error)
 		initialisation(&i,&var.len,&var.token,&var.token_word);
 		while (i <= (int)ft_strlen(head->value))
 		{
-			var.len = len_word(head->value,i);
+			var.len = len_word(head->value,i,env_list);
 			if(var.len)
 				var.token_word = put_data_token(&var.len, head->value,&i);
 			put_word(&data,&var.token_word);

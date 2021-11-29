@@ -37,20 +37,17 @@ int main(int argc, char **argv, char **envp)
 	{
 		str = readline("-> minishell ");
 		add_history(str);
-		parsing(str,&error);
+		parsing(str,&error,env_list);
 		if(!error)
 			printf("Yes\n");
 
-		
-// exec
-	// if (1 && is_builtin(data->arguments[0]))
+
+	// if (1 && is_builtin("export"))
 	// {
 	// 	printf("%s\n", data->arguments[0]);
 	// 	ft_builtins(data, &env_list);
 	// }
 	// else
 	// 	exec_cmd(data, envp);
-
-		//ft_free_split(str);
 	}
 }
