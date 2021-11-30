@@ -132,7 +132,7 @@ int		check_dollar_word(char *value, int start)
 	return(len);
 }
 
-char	*get_env_vf(char *value, t_envp *env_list)
+char	*get_env(char *value, t_envp *env_list)
 {
 	char *dollar;
 	int		i;
@@ -153,21 +153,24 @@ char	*get_env_vf(char *value, t_envp *env_list)
 		}
 		i++;
 	}
-	printf("--%s\n",dollar);
 	while (env_list != NULL)
 	{
 		if(!ft_strcmp(env_list->key,value))
 			return(env_list->value);
 		env_list = env_list->next;
 	}
-	return("ls -la");
+	return(dollar);
 }
 
-char	*get_env(char *value)
+char	*get_env_couts(char *value, t_envp *env_list)
 {
-	value[0] = 'd';
-	char *str = ft_strdup("ls -la");
-	return(str);
+	while (env_list != NULL)
+	{
+		if(!ft_strcmp(env_list->key,value))
+			return(env_list->value);
+		env_list = env_list->next;
+	}
+	return("\0");
 }
 
 void	take_dollar(char *value, int *start, t_init *var,t_envp *env_list)
@@ -188,7 +191,7 @@ void	take_dollar(char *value, int *start, t_init *var,t_envp *env_list)
 	}
 	if(dollar)
 	{
-		var->i = var->i + (int)ft_strlen(get_env_vf(dollar,env_list));
+		var->i = var->i + (int)ft_strlen(get_env_couts(dollar,env_list));
 		var->i = var->i - 1;
 		*start = *start - 1;
 	}
@@ -232,7 +235,7 @@ void	dollar_manipulation(char *value,int *start, int *i,t_envp *env_list)
 	}
 	if(var.dollar)
 	{
-		*i = *i + (int)ft_strlen(get_env_vf(var.dollar,env_list));
+		*i = *i + (int)ft_strlen(get_env(var.dollar,env_list));
 		*i = *i - 1;
 		*start = *start - 1;
 	}
@@ -307,105 +310,105 @@ char	*initialisation_dollar(int *len_dollar, int *i)
 	return(dollar);
 }
 
-char *dollar_value(char *token_word,char *value,int *len, int *i)
+char *dollar_value(t_init *vr,int *len, int *i,t_envp *env_list)
 {
 	t_init var;
 	int j;
 
 	j = 0;
-	var.len_dollar = check_dollar(value,*i + 1);
+	var.len_dollar = check_dollar(vr->value,*i + 1);
 	var.dollar = initialisation_dollar(&var.len_dollar,i);
 	while (var.dollar[var.len_dollar])
 	{
-		var.dollar[var.len_dollar] = value[*i];
+		var.dollar[var.len_dollar] = vr->value[*i];
 		var.len_dollar = var.len_dollar + 1;
 		*i = *i + 1;
 	}
 	if(var.dollar)
 	{
-		var.dollar = ft_strdup(get_env(var.dollar));
+		var.dollar = ft_strdup(get_env_couts(var.dollar,env_list));
 		j = 0;
 		while (var.dollar[j])
 		{
-			token_word[*len] = var.dollar[j];
+			vr->token_word[*len] = var.dollar[j];
 			*len = *len + 1;
 			j++;
 		}
 		var.dollar = NULL;
 	}
-	return(token_word);
+	return(vr->token_word);
 }
 
 
-void	add_dollar(int *i, int *len, char *token_word, char *value)
+void	add_dollar(int *i, int *len,t_init *var)
 {
-	if(value[*i - 1] == '\"')
+	if(var->value[*i - 1] == '\"')
 	{
-		token_word[*len] = value[*i - 1];
+		var->token_word[*len] = var->value[*i - 1];
 		*len = *len + 1;
 	}
 }
 
-void	right_couts(char *token_word, char *value, int *len, int *i)
+void	right_couts(t_init *var, int *len, int *i)
 {
-	token_word[*len] = value[*i - 1];
+	var->token_word[*len] = var->value[*i - 1];
 	*len = *len + 1;
 }
 
-void	add_double_couts(char *token_word, char *value, int *len, int *i)
+void	add_double_couts(t_init *var, int *len, int *i)
 {
-	if(value[*i - 1] == '\"')
+	if(var->value[*i - 1] == '\"')
 	{
-		token_word[*len] = value[*i];
+		var->token_word[*len] = var->value[*i];
 		*len = *len + 1;
 	}
-	token_word[*len] = value[*i];
+	var->token_word[*len] = var->value[*i];
 	*len = *len + 1;
 	*i = *i + 1;
 }
 
-char	*word_double_couts(int *i,char *value, int *len,char *token_word)
+char	*word_double_couts(int *i, int *len, t_init *var,t_envp *env_list)
 {
 	*i = *i + 1;
-	while (*i <= (int)ft_strlen(value))
+	while (*i <= (int)ft_strlen(var->value))
 	{
-		if(value[*i] == '\"')
+		if(var->value[*i] == '\"')
 		{
-			add_double_couts(token_word,value,len,i);
+			add_double_couts(var,len,i);
 			break;
 		}
-		if(value[*i] == '$' && delimiter(value,i))
+		if(var->value[*i] == '$' && delimiter(var->value,i))
 		{
-			add_dollar(i,len,token_word,value);
-			token_word = dollar_value(token_word,value,len,i);
+			add_dollar(i,len,var);
+			var->token_word = dollar_value(var,len,i,env_list);
 		}
 		else
 		{
-			if(value[*i - 1] == '\"')
-				right_couts(token_word, value, len,i);
-			token_word[*len] = value[*i];
+			if(var->value[*i - 1] == '\"')
+				right_couts(var,len,i);
+			var->token_word[*len] = var->value[*i];
 			*len = *len + 1;
 			*i = *i + 1;
 		}
 	}
-	return(token_word);
+	return(var->token_word);
 }
 
-char *word_single_couts(int *i,char *value, int *len,char *token_word)
+char *word_single_couts(int *i,int *len,t_init *var)
 {
 	*i = *i + 1;
-	while (*i <= (int)ft_strlen(value))
+	while (*i <= (int)ft_strlen(var->value))
 	{
-		if(value[*i] == '\'')
+		if(var->value[*i] == '\'')
 		{
 			*i = *i + 1;
 			break;
 		}
-		token_word[*len] = value[*i];
+		var->token_word[*len] = var->value[*i];
 		*len = *len + 1;
 		*i = *i + 1;
 	}
-	return(token_word);
+	return(var->token_word);
 }
 
 char *dollar_token(int *i,char *dollar,char *value)
@@ -456,27 +459,27 @@ char	*initialisation_token(int *len)
 	return(token_word);
 }
 
-void	convert_dollar(char *token_word,char *value, int *i, int *len)
+void	convert_dollar(t_init *vr, int *i, int *len,t_envp *env_list)
 {
 	t_init var;
 	int		j;
 
 	j = 0;
-	var.len_dollar = check_dollar(value,*i + 1);
+	var.len_dollar = check_dollar(vr->value,*i + 1);
 	var.dollar = initialisation_dollar(&var.len_dollar,i);
 	while (var.dollar[var.len_dollar])
 	{
-		var.dollar[var.len_dollar] = value[*i];
+		var.dollar[var.len_dollar] = vr->value[*i];
 		var.len_dollar = var.len_dollar + 1;
 		*i = *i + 1;
 	}
 	if(var.dollar)
 	{
-		var.dollar = ft_strdup(get_env(var.dollar));
+		var.dollar = ft_strdup(get_env(var.dollar,env_list));
 		j = 0;
 		while (var.dollar[j])
 		{
-			token_word[*len] = var.dollar[j];
+			vr->token_word[*len] = var.dollar[j];
 			*len = *len + 1;
 			j++;
 		}
@@ -484,40 +487,42 @@ void	convert_dollar(char *token_word,char *value, int *i, int *len)
 	}
 }
 
-void	continue_add(char *token_word, char *value, int *len,int *i)
+void	continue_add(t_init *var, int *len,int *i)
 {
-	token_word[*len] = value[*i];
+	var->token_word[*len] = var->value[*i];
 	*i = *i + 1;
 	*len = *len + 1;
 }
 
-char *put_data_token(int *len, char *value, int *i)
+char *put_data_token(int *len, char *value, int *i, t_envp *env_list)
 {
-	char *token_word;
+	t_init	var;
 	
-	token_word = initialisation_token(len);
-	while (*len <= (int)ft_strlen(token_word))
+	var.token_word = initialisation_token(len);
+	env_list = NULL;
+	var.value = value;
+	while (*len <= (int)ft_strlen(var.token_word))
 	{
 		if(value[*i] == '\"')
-			token_word = word_double_couts(i, value,len,token_word);
-		else if(value[*i] == '\'')
-		token_word = word_single_couts(i, value,len,token_word);
-		else if(value[*i] == '>' || value[*i] == '<' ||
-		value[*i] == '|')
+			var.token_word = word_double_couts(i, len,&var,env_list);
+		else if(var.value[*i] == '\'')
+		var.token_word = word_single_couts(i,len,&var);
+		else if(var.value[*i] == '>' || var.value[*i] == '<' ||
+		var.value[*i] == '|')
 		{
 			*i = *i + 1;
 			break;
 		}
 		else
 		{
-			if(value[*i] == '$' && delimiter(value,i))
-				convert_dollar(token_word,value,i,len);
+			if(var.value[*i] == '$' && delimiter(var.value,i))
+				convert_dollar(&var,i,len,env_list);
 			else
-				continue_add(token_word,value,len,i);
+				continue_add(&var,len,i);
 		}
 	}
 	*i = *i - 1;
-	return(token_word);
+	return(var.token_word);
 }
 
 void initialisation_init(char **token, char **token_word,int *len_dollar,char **dollar)
@@ -572,7 +577,7 @@ int    check_tokens(t_list *head, int error,t_envp *env_list)
 		{
 			var.len = len_word(head->value,i,env_list);
 			if(var.len)
-				var.token_word = put_data_token(&var.len, head->value,&i);
+				var.token_word = put_data_token(&var.len, head->value,&i,env_list);
 			put_word(&data,&var.token_word);
 			insert_dividers(&data,head->value,&i,&var.type);
 			i++;

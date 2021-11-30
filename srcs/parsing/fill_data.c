@@ -164,6 +164,7 @@ int		get_allocation(char *value)
 	{
 		if(value[i] != '\"' && value[i] != ' ' && value[i + 1] == '\"')
 		{
+			nb++;
 			len--;
 		}
 		else if(value[i] == ' ' && value[i + 1] == '\"' )
@@ -275,7 +276,10 @@ char  **filter_args(char *value)
 					while (value[tmp])
 					{
 						if(value[tmp] == '\"')
+						{
+							tmp++;
 							break;
+						}
 						filter[r][i] = value[tmp];
 						i++;
 						tmp++;

@@ -60,6 +60,7 @@ typedef		struct s_list{
 typedef		struct s_init{
 	int type;
 	char *token_word;
+	char *value;
 	int len;
 	int close;
 	int i;
