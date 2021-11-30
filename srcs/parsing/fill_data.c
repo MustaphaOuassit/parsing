@@ -162,6 +162,8 @@ int		get_allocation(char *value)
 	len = len_couts(value);
 	while (value[i])
 	{
+		if(value[i] == '$' && delimiter(value,&i))
+			printf("yest\n");
 		if(value[i] != '\"' && value[i] != ' ' && value[i + 1] == '\"')
 		{
 			nb++;
@@ -326,7 +328,7 @@ int	all_data(t_data	**head, t_redirection *rdt, char **arguments, int nb_heredoc
 }
 
 
-int     fill_data(t_tokens *tokens)
+int     fill_data(t_tokens *tokens, t_data **data)
 {
     t_redirection *rdt;
     t_args *args;
@@ -336,14 +338,12 @@ int     fill_data(t_tokens *tokens)
 	int 	j;
 	int t;
 	char **filter;
-	t_data *data;
 	char **arguments;
 	int		pipe;
 	int		nb_heredoc;
 
     rdt = NULL;
     args = NULL;
-	data = NULL;
 	filter = NULL;
 	arguments = NULL;
 	check = 0;
@@ -366,7 +366,7 @@ int     fill_data(t_tokens *tokens)
 				args = args->next;
 			}
 			arguments[len] = 0;
-			all_data(&data,rdt,arguments,nb_heredoc);
+			all_data(data,rdt,arguments,nb_heredoc);
 			rdt = NULL;
 			len = 0;
 			nb_heredoc = 0;
@@ -417,35 +417,10 @@ int     fill_data(t_tokens *tokens)
 				args = args->next;
 			}
 			arguments[len] = 0;
-			all_data(&data,rdt,arguments,nb_heredoc);
+			all_data(data,rdt,arguments,nb_heredoc);
 			rdt = NULL;
 			len = 0;
 			nb_heredoc = 0;
 	}
-
-	while (data != NULL)
-	{
-		j = 0;
-		printf("-------------------\n");
-		printf("\n");
-		printf("Arguments :\n");
-		while (data->arguments[j])
-		{
-			printf("%s\n",data->arguments[j]);
-			j++;
-		}
-		printf("\n");
-		printf("Redirections :\n");
-		while (data->redirection != NULL)
-		{
-			printf("%s %d\n",data->redirection->file_name,data->redirection->type);
-			data->redirection = data->redirection->next;
-		}
-		printf("\n");
-		printf("Heredoc :\n");
-		printf("%d\n",data->nb_heredoc);
-		data = data->next;
-	}
-	
     return(0);
 }

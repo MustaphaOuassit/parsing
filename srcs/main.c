@@ -37,10 +37,34 @@ int main(int argc, char **argv, char **envp)
 	{
 		str = readline("-> minishell ");
 		add_history(str);
-		parsing(str,&error,env_list);
+		parsing(str,&error,env_list,&data);
+		error = 0;
 		if(!error)
-			printf("Yes\n");
-
+		{
+			while (data != NULL)
+			{
+				j = 0;
+				printf("-------------------\n");
+				printf("\n");
+				printf("Arguments :\n");
+				while (data->arguments[j])
+				{
+				printf("%s\n",data->arguments[j]);
+				j++;
+			}
+				printf("\n");
+				printf("Redirections :\n");
+			while (data->redirection != NULL)
+			{
+				printf("%s %d\n",data->redirection->file_name,data->redirection->type);
+				data->redirection = data->redirection->next;
+			}
+				printf("\n");
+				printf("Heredoc :\n");
+				printf("%d\n",data->nb_heredoc);
+				data = data->next;
+			}
+		}
 
 	// if (1 && is_builtin("export"))
 	// {

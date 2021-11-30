@@ -132,7 +132,7 @@ char     *get_token(char *cmd, int *start)
     return(token);
 }
 
-void    parsing(char *cmd, int *error,t_envp *env_list)
+void    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
 {
     int start;
     char *token;
@@ -156,6 +156,6 @@ void    parsing(char *cmd, int *error,t_envp *env_list)
         start++;
     }
     if(*error != -1)
-        *error = check_tokens(head,*error,env_list);
+        *error = check_tokens(head,*error,env_list,data);
     *error = 1;
 }

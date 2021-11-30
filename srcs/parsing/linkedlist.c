@@ -559,7 +559,7 @@ void	insert_dividers(t_tokens **data ,char *value,int *i,int *type)
 	}
 }
 
-int    check_tokens(t_list *head, int error,t_envp *env_list)
+int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt)
 {
 	t_init var;
 	t_tokens *data;
@@ -584,6 +584,6 @@ int    check_tokens(t_list *head, int error,t_envp *env_list)
 		}
         head = head->next;
     }
-	error = fill_data(data);
+	error = fill_data(data,dt);
 	return(error);
 }
