@@ -31,8 +31,6 @@ typedef struct s_envp{
 	struct s_envp *next;
 }   t_envp;
 
-
-
 typedef struct s_initialisation
 {
 	int	i;
@@ -125,5 +123,16 @@ int    list_tokens(t_list **head, char *data);
 int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt);
 int     fill_data(t_tokens *tokens, t_data **data);
 int		delimiter(char *value, int *start);
+int		delimiter_skip(char *value, int *start);
 
+
+
+
+
+
+
+
+
+
+ 
 #endif

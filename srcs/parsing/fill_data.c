@@ -137,16 +137,71 @@ int		len_couts(char *value)
 	int i;
 	int l;
 
+	printf("**%s\n",value);
 	i = 0;
 	l = 0;
 
 	while (value[i])
 	{
 		if(value[i] == '\"')
+		{
 			l++;
+			i++;
+			while (value[i])
+			{
+				if(value[i] == '\"')
+				{
+					l++;
+					break;
+				}
+				i++;
+			}
+		}
+		if(value[i] == '\'')
+		{
+			l++;
+			i++;
+			while (value[i])
+			{
+				if(value[i] == '\'')
+				{
+					l++;
+					break;
+				}
+				i++;
+			}
+		}
 		i++;
 	}
 	return(l / 2);
+}
+
+
+
+int	end_dollar(char *value, int *start)
+{
+	if(value[*start] == '\"'
+	|| value[*start] == '>' || value[*start] == '<'
+	|| value[*start] == '|' || value[*start] == '$'
+	|| value[*start] == '\'')
+	{
+		return(1);
+	}
+	return(0);
+}
+
+void	skip_value(char *value, int *start)
+{
+	while (value[*start])
+	{
+		if(value[*start] == '?' && value[*start + 1] != '\0')
+		{
+			*start = *start + 1;
+			break;
+		}
+		*start = *start + 1;
+		}
+	*start = *start - 1;
 }
 
 int		get_allocation(char *value)
@@ -162,14 +217,12 @@ int		get_allocation(char *value)
 	len = len_couts(value);
 	while (value[i])
 	{
-		if(value[i] == '$' && delimiter(value,&i))
-			printf("yest\n");
-		if(value[i] != '\"' && value[i] != ' ' && value[i + 1] == '\"')
+		if(value[i] != '\"' && value[i] != '\'' && value[i] != ' ' && value[i + 1] == '\"' && value[i + 1] == '\'')
 		{
 			nb++;
 			len--;
 		}
-		else if(value[i] == ' ' && value[i + 1] == '\"' )
+		else if(value[i] == ' ' && ((value[i + 1] == '\"') ||  (value[i + 1] == '\'')))
 			len++;
 		if(value[i] == '\"')
 		{
@@ -187,6 +240,28 @@ int		get_allocation(char *value)
 				value[i] = ' ';
 				i++;
 			}
+		}
+		else if(value[i] == '\'')
+		{
+			value[i] = ' ';
+			i++;
+			while (value[i])
+			{
+				if(value[i] == '\'')
+				{
+					if(value[i + 1] != ' ')
+						len--;
+					value[i] = ' ';
+					break;
+				}
+				value[i] = ' ';
+				i++;
+			}
+		}
+		else if(value[i] == '$' && delimiter_skip(value,&i))
+		{
+			nb++;
+			skip_value(value,&i);
 		}
 		i++;
 	}
@@ -231,14 +306,20 @@ int		len_args(char *value ,int *start)
 		{
 			if(value[*start] != '\"')
 			{
-				check = 1;
-				len++;
+				if(value[*start] == '$' && delimiter_skip(value,start))
+					skip_value(value,start);
+				else
+				{
+					check = 1;
+					len++;
+				}
 			}
 		}
 		else if(value[*start] == ' ' && check == 1)
 			break;
 		*start = *start + 1;
 	}
+	printf("%d\n",len);
 	return(len);
 }
 
@@ -289,8 +370,13 @@ char  **filter_args(char *value)
 				}
 				else if(value[tmp] != ' ')
 				{
-					filter[r][i] = value[tmp];
-					i++;
+					if(value[tmp] == '$' && delimiter_skip(value,&tmp))
+						skip_value(value,&tmp);
+					else
+					{
+						filter[r][i] = value[tmp];
+						i++;
+					}
 					tmp++;
 				}
 				else

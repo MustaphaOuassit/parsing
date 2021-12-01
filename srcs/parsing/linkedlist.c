@@ -137,15 +137,19 @@ char	*get_env(char *value, t_envp *env_list)
 	char *dollar;
 	int		i;
 	int		j;
+	t_envp *tmp;
 
 	i = 0;
 	j = 0;
-	dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 2));
-	dollar[(int)ft_strlen(value) + 1] = '\0';
+	tmp = env_list;
+	dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 3));
+	dollar[(int)ft_strlen(value) + 2] = '\0';
 	while (dollar[i])
 	{
 		if(i == 0)
 			dollar[i] = '$';
+		else if(i == (int)ft_strlen(dollar) - 1)
+			dollar[i] = '?';
 		else
 		{
 			dollar[i] = value[j];
@@ -153,23 +157,27 @@ char	*get_env(char *value, t_envp *env_list)
 		}
 		i++;
 	}
-	while (env_list != NULL)
+	while (tmp != NULL)
 	{
-		if(!ft_strcmp(env_list->key,value))
-			return(env_list->value);
-		env_list = env_list->next;
+		if(!ft_strcmp(tmp->key,value))
+			return(tmp->value);
+		tmp = tmp->next;
 	}
 	return(dollar);
 }
 
 char	*get_env_couts(char *value, t_envp *env_list)
 {
-	while (env_list != NULL)
+	t_envp	*tmp;
+
+	tmp = env_list;
+	while (tmp != NULL)
 	{
-		if(!ft_strcmp(env_list->key,value))
-			return(env_list->value);
-		env_list = env_list->next;
+		if(!ft_strcmp(tmp->key,value))
+			return(tmp->value);
+		tmp = tmp->next;
 	}
+	tmp = NULL;
 	return("\0");
 }
 
@@ -253,10 +261,25 @@ int	delimiter(char *value, int *start)
 	return(0);
 }
 
+int	delimiter_skip(char *value, int *start)
+{
+	if(value[*start] == '$' && value[*start + 1] && value[*start + 1] != '\"'
+	&& value[*start + 1] != '>' && value[*start + 1] != '<'
+	&& value[*start + 1] != '|' && value[*start + 1] != '$'
+	&& value[*start + 1] != '\'')
+	{
+		return(1);
+	}
+	return(0);
+}
+
 void	single_couts(char *value, int *start, int *i, t_envp *env_list)
 {
 	if (value[*start] == '\'')
+	{
 		take_couts(start,value,i);
+		*i = *i + 2;
+	}
 	else if(value[*start] == '$' && delimiter(value, start))
 		dollar_manipulation(value,start,i,env_list);
 	else
@@ -401,9 +424,13 @@ char *word_single_couts(int *i,int *len,t_init *var)
 	{
 		if(var->value[*i] == '\'')
 		{
+			var->token_word[*len] = var->value[*i];
+			*len = *len + 1;
 			*i = *i + 1;
 			break;
 		}
+		if(var->value[*i - 1] == '\'')
+				right_couts(var,len,i);
 		var->token_word[*len] = var->value[*i];
 		*len = *len + 1;
 		*i = *i + 1;
@@ -499,7 +526,6 @@ char *put_data_token(int *len, char *value, int *i, t_envp *env_list)
 	t_init	var;
 	
 	var.token_word = initialisation_token(len);
-	env_list = NULL;
 	var.value = value;
 	while (*len <= (int)ft_strlen(var.token_word))
 	{
@@ -559,6 +585,19 @@ void	insert_dividers(t_tokens **data ,char *value,int *i,int *type)
 	}
 }
 
+int		allocation_envp(t_envp *data)
+{
+	int	len;
+
+	len = 0;
+	while (data != NULL)
+	{
+		len++;
+		data = data->next;
+	}
+	return(len);
+}
+
 int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt)
 {
 	t_init var;
@@ -570,6 +609,7 @@ int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt)
 	var.type = 0;
 	var.len = 0;
 	initialisation_init(&var.token,&var.token_word,&var.len_dollar,&var.dollar);
+
     while (head != NULL)
     {
 		initialisation(&i,&var.len,&var.token,&var.token_word);
