@@ -137,7 +137,6 @@ int		len_couts(char *value)
 	int i;
 	int l;
 
-	printf("**%s\n",value);
 	i = 0;
 	l = 0;
 
@@ -295,14 +294,24 @@ int		len_args(char *value ,int *start)
 			while (value[*start])
 			{
 				if(value[*start] == '\"')
-				{
 					break;
-				}
 				len++;
 				*start = *start + 1;
 			}
 		}
-		if(value[*start] != ' ')
+		else if(value[*start] == '\'')
+		{
+			*start = *start + 1;
+			while (value[*start])
+			{
+				if(value[*start] == '\'')
+					break;
+				len++;
+				*start = *start + 1;
+			}
+			
+		}
+		else if(value[*start] != ' ')
 		{
 			if(value[*start] != '\"')
 			{
@@ -319,7 +328,6 @@ int		len_args(char *value ,int *start)
 			break;
 		*start = *start + 1;
 	}
-	printf("%d\n",len);
 	return(len);
 }
 
@@ -359,6 +367,21 @@ char  **filter_args(char *value)
 					while (value[tmp])
 					{
 						if(value[tmp] == '\"')
+						{
+							tmp++;
+							break;
+						}
+						filter[r][i] = value[tmp];
+						i++;
+						tmp++;
+					}
+				}
+				else if(value[tmp] == '\'')
+				{
+					tmp++;
+					while (value[tmp])
+					{
+						if(value[tmp] == '\'')
 						{
 							tmp++;
 							break;
@@ -427,6 +450,7 @@ int     fill_data(t_tokens *tokens, t_data **data)
 	char **arguments;
 	int		pipe;
 	int		nb_heredoc;
+	char	*tmp;
 
     rdt = NULL;
     args = NULL;
@@ -438,6 +462,7 @@ int     fill_data(t_tokens *tokens, t_data **data)
 	t = 0;
 	pipe = 0;
 	nb_heredoc = 0;
+	tmp = NULL;
     while (tokens != NULL)
     {
 		if(tokens->type == 1)
@@ -473,6 +498,18 @@ int     fill_data(t_tokens *tokens, t_data **data)
 			else if(check == 1)
 			{
 				check = 0;
+				// if(tokens->value[0] == '$' && delimiter(tokens->value,&check))
+				// {
+				// 	check = 0;
+				// 	tmp = ft_strdup(tokens->value);
+				// 	tokens->value = (char *)malloc(sizeof(char) * ((int)ft_strlen(tokens->value)));
+				// 	tokens->value[(int)ft_strlen(tokens->value) - 1] = '\0';
+				// 	while (tokens->value[check])
+				// 	{
+				// 		tokens->value[check] = tmp[check];
+				// 		check++;
+				// 	}
+				// }
 				redirection_token(&rdt,type,tokens->value);
 			}
 			else
