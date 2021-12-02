@@ -447,7 +447,7 @@ int		get_len_word(char *value)
 	check = 0;
 	while (value[i])
 	{
-		if(value[i] == '\"')
+		 if(value[i] == '\"')
 		{
 			i++;
 			while (value[i])
@@ -488,74 +488,10 @@ int		get_len_word(char *value)
 
 char	*filter_file_dollar(char *value)
 {
-	int 	i;
-	int		len;
+	int	i;
 	char	*file_name;
-	int		check;
 
 	i = 0;
-	check = 0;
-	len = get_len_word(value);
-	printf("%d\n",len);
-	file_name = (char *)malloc(sizeof(char) * (len + 1));
-	file_name[len] = 0;
-	len = 0;
-	while (file_name[len])
-	{
-		if(value[i] == '\"')
-		{
-			i++;
-			while (value[i])
-			{
-				if (value[i] == '\"')
-				{
-					i++;
-					break;
-				}
-				file_name[len] = value[i];
-				len++;
-				i++;
-			}
-			
-		}
-		else if(value[i] == '\'')
-		{
-			i++;
-			while (value[i])
-			{
-				if (value[i] == '\'')
-				{
-					i++;
-					break;
-				}
-				file_name[len] = value[i];
-				len++;
-				i++;
-			}
-			
-		}
-		else
-		{
-			if(value[i] == '$')
-			{
-				file_name[len] = value[i];
-				i++;
-				len++;
-				check = 1;
-			}
-			if(value[i] == '?' && check == 1)
-			{
-				i++;
-				check = 0;
-			}
-			else
-			{
-				file_name[len] = value[i];
-				i++;
-				len++;
-			}
-		}
-	}
 	return(file_name);
 }
 
