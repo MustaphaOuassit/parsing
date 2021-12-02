@@ -436,6 +436,129 @@ int	all_data(t_data	**head, t_redirection *rdt, char **arguments, int nb_heredoc
     return(0);  
 }
 
+int		get_len_word(char *value)
+{
+	int i;
+	int len;
+	int check;
+
+	i = 0;
+	len = 0;
+	check = 0;
+	while (value[i])
+	{
+		if(value[i] == '\"')
+		{
+			i++;
+			while (value[i])
+			{
+				if (value[i] == '\"')
+					break;
+				len++;
+				i++;
+			}
+			
+		}
+		else if(value[i] == '\'')
+		{
+			i++;
+			while (value[i])
+			{
+				if (value[i] == '\'')
+					break;
+				len++;
+				i++;
+			}
+		}
+		else if(value[i] != '\'' && value[i] != '\"')
+		{
+			if(value[i] == '$')
+				check = 1;
+			if(value[i] == '?' && check == 1)
+			{
+				len--;
+				check = 0;
+			}
+			len++;
+		}
+		i++;
+	}
+	return(len);
+}
+
+char	*filter_file_dollar(char *value)
+{
+	int 	i;
+	int		len;
+	char	*file_name;
+	int		check;
+
+	i = 0;
+	check = 0;
+	len = get_len_word(value);
+	printf("%d\n",len);
+	file_name = (char *)malloc(sizeof(char) * (len + 1));
+	file_name[len] = 0;
+	len = 0;
+	while (file_name[len])
+	{
+		if(value[i] == '\"')
+		{
+			i++;
+			while (value[i])
+			{
+				if (value[i] == '\"')
+				{
+					i++;
+					break;
+				}
+				file_name[len] = value[i];
+				len++;
+				i++;
+			}
+			
+		}
+		else if(value[i] == '\'')
+		{
+			i++;
+			while (value[i])
+			{
+				if (value[i] == '\'')
+				{
+					i++;
+					break;
+				}
+				file_name[len] = value[i];
+				len++;
+				i++;
+			}
+			
+		}
+		else
+		{
+			if(value[i] == '$')
+			{
+				file_name[len] = value[i];
+				i++;
+				len++;
+				check = 1;
+			}
+			if(value[i] == '?' && check == 1)
+			{
+				i++;
+				check = 0;
+			}
+			else
+			{
+				file_name[len] = value[i];
+				i++;
+				len++;
+			}
+		}
+	}
+	return(file_name);
+}
+
 
 int     fill_data(t_tokens *tokens, t_data **data)
 {
@@ -498,18 +621,8 @@ int     fill_data(t_tokens *tokens, t_data **data)
 			else if(check == 1)
 			{
 				check = 0;
-				// if(tokens->value[0] == '$' && delimiter(tokens->value,&check))
-				// {
-				// 	check = 0;
-				// 	tmp = ft_strdup(tokens->value);
-				// 	tokens->value = (char *)malloc(sizeof(char) * ((int)ft_strlen(tokens->value)));
-				// 	tokens->value[(int)ft_strlen(tokens->value) - 1] = '\0';
-				// 	while (tokens->value[check])
-				// 	{
-				// 		tokens->value[check] = tmp[check];
-				// 		check++;
-				// 	}
-				// }
+				if(type != 5)
+					tokens->value = filter_file_dollar(tokens->value);
 				redirection_token(&rdt,type,tokens->value);
 			}
 			else

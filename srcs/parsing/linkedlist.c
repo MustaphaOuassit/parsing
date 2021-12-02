@@ -424,9 +424,18 @@ char *word_single_couts(int *i,int *len,t_init *var)
 	{
 		if(var->value[*i] == '\'')
 		{
+			if(var->value[*i - 1] == '\'')
+			{
 			var->token_word[*len] = var->value[*i];
 			*len = *len + 1;
-			*i = *i + 1;
+		}
+		var->token_word[*len] = var->value[*i];
+		*len = *len + 1;
+		*i = *i + 1;
+
+			// var->token_word[*len] = var->value[*i];
+			// *len = *len + 1;
+			// *i = *i + 1;
 			break;
 		}
 		if(var->value[*i - 1] == '\'')
