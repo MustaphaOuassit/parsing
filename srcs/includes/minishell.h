@@ -28,6 +28,7 @@ typedef struct s_envp{
 	char    *key;
 	char    *value;
 	int     equal;
+	int		type;
 	struct s_envp *next;
 }   t_envp;
 
@@ -63,6 +64,7 @@ typedef		struct s_init{
 	int close;
 	int i;
 	int len_dollar;
+	int	redirection;
 	char *dollar;
 	char *token;
 }		t_init;
