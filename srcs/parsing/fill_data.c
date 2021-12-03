@@ -436,6 +436,30 @@ int	all_data(t_data	**head, t_redirection *rdt, char **arguments, int nb_heredoc
     return(0);  
 }
 
+int		len_file_name(char *value)
+{
+	int i;
+	int len;
+	int check;
+
+	i = 0;
+	len = 0;
+	check = 0;
+	while (value[i])
+	{
+		if(value[i] == '$' && delimiter(value,&i))
+			check = 1;
+		if(value[i] == '?' && check == 1)
+		{
+			len--;
+			check = 0;
+		}
+		len++;
+		i++;
+	}
+	return(len);
+}
+
 int		get_len_word(char *value)
 {
 	int i;
@@ -486,12 +510,181 @@ int		get_len_word(char *value)
 	return(len);
 }
 
-char	*filter_file_dollar(char *value)
+int		get_len(char *value)
 {
-	int	i;
+	int i;
+	int len;
+	int check;
+
+	i = 0;
+	len = 0;
+	check = 0;
+	while (value[i])
+	{
+		if(value[i] == '\"')
+		{
+			i++;
+			while (value[i])
+			{
+				if(value[i] == '\"')
+					break;
+				i++;
+				len++;
+			}
+			
+		}
+		else if(value[i] == '\'')
+		{
+			i++;
+			while (value[i])
+			{
+				if(value[i] == '\'')
+					break;
+				i++;
+				len++;
+			}
+			
+		}
+		else if(value[i] == '$' && delimiter(value, &i))
+		{
+			while (value[i])
+			{
+				if(value[i] == '?')
+					break;
+				i++;
+			}
+		}
+		else
+			len++;
+		i++;
+	}
+	return(len);
+}
+
+int		is_couts(char *value)
+{
+	int i;
+
+	i = 0;
+	while (value[i])
+	{
+		if(value[i] == '\'' || value[i] == '\"' || (value[i] == '$' && !(delimiter(value,&i)) ))
+			return(1);
+		i++;
+	}
+	return(0);
+}
+
+char	*skip_dollar(char *value)
+{
+	int i;
+	int	len;
 	char	*file_name;
 
 	i = 0;
+	len = get_len(value);
+	file_name = (char *)malloc(sizeof(char) * (len + 1));
+	file_name[len] = 0;
+	len = 0;
+	while (file_name[len])
+	{
+		if(value[i] == '\"')
+		{
+			i++;
+			while (value[i])
+			{
+				if(value[i] == '\"')
+					break;
+				file_name[len] = value[i];
+				i++;
+				len++;
+			}
+			
+		}
+		else if(value[i] == '\'')
+		{
+			i++;
+			while (value[i])
+			{
+				if(value[i] == '\'')
+					break;
+				file_name[len] = value[i];
+				i++;
+				len++;
+			}
+		}
+		else if(value[i] == '$' && delimiter(value, &i))
+		{
+			while (value[i])
+			{
+				if(value[i] == '?')
+					break;
+				i++;
+			}
+		}
+		else
+		{
+			file_name[len] = value[i];
+			len++;
+		}
+		i++;
+	}
+	return(file_name);
+}
+
+char	*fill_file(char *value)
+{
+	int i;
+	int		len;
+	char	*file_name;
+	int		check;
+
+	i = 0;
+	check = 0;
+	len = len_file_name(value);
+	file_name = (char *)malloc(sizeof(char) * (len + 1));
+	file_name[len] = '\0';
+	len = 0;
+	while (file_name[len])
+	{
+		if(value[i] == '$' && delimiter(value,&i))
+		{
+			file_name[len] = value[i];
+			i++;
+			len++;
+			check = 1;
+		}
+		if(value[i] == '?' && check == 1)
+		{
+			i++;
+			check = 0;
+		}
+		else
+		{
+			file_name[len] = value[i];
+			i++;
+			len++;
+		}
+	}
+	return(file_name);
+}
+
+char	*filter_file_dollar(char *value, int *error)
+{
+	int	i;
+	char	*file_name;
+	int		check;
+
+	i = 0;
+	check = is_couts(value);
+	if(check)
+		file_name = skip_dollar(value);
+	else
+	{
+		file_name = fill_file(value);
+		if(file_name[0] == '$')
+			*error = 1;
+	}
 	return(file_name);
 }
 
@@ -510,6 +703,7 @@ int     fill_data(t_tokens *tokens, t_data **data)
 	int		pipe;
 	int		nb_heredoc;
 	char	*tmp;
+	int		error;
 
     rdt = NULL;
     args = NULL;
@@ -519,6 +713,7 @@ int     fill_data(t_tokens *tokens, t_data **data)
 	len = 0;
 	j = 0;
 	t = 0;
+	error = 0;
 	pipe = 0;
 	nb_heredoc = 0;
 	tmp = NULL;
@@ -558,7 +753,16 @@ int     fill_data(t_tokens *tokens, t_data **data)
 			{
 				check = 0;
 				if(type != 5)
-					tokens->value = filter_file_dollar(tokens->value);
+				{
+					tokens->value = filter_file_dollar(tokens->value,&error);
+					if(error == 1)
+					{
+						write(1,"minishell: ",11);
+						write(1,tokens->value,(int)ft_strlen(tokens->value));
+						write(1,": ambiguous redirect\n",21);
+						return(1);
+					}
+				}
 				redirection_token(&rdt,type,tokens->value);
 			}
 			else

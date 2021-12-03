@@ -413,7 +413,7 @@ char	*word_double_couts(int *i, int *len, t_init *var,t_envp *env_list)
 			*len = *len + 1;
 			*i = *i + 1;
 		}
-	}
+	}								
 	return(var->token_word);
 }
 
