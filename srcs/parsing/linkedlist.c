@@ -225,21 +225,7 @@ void	initialisation_var(int *i, int *close, char **dollar, int *len_dollar)
 	*len_dollar = 0;
 }
 
-int	 is_space(char *value)
-{
-	int i;
-
-	i = 0;
-	while (value[i])
-	{
-		if(value[i] == ' ')
-			return(1);
-		i++;
-	}
-	return(0);
-}
-
-int	dollar_manipulation(char *value,int *start, int *i,t_envp *env_list)
+void	dollar_manipulation(char *value,int *start, int *i,t_envp *env_list)
 {
 	t_init var;
 	*i = *i + 1;
@@ -257,19 +243,10 @@ int	dollar_manipulation(char *value,int *start, int *i,t_envp *env_list)
 	}
 	if(var.dollar)
 	{
-		printf("type : %d\n",env_list->type);
-		var.value = get_env(var.dollar,env_list);
-		if (env_list->type == 2 && is_space(var.value))
-		{
-			write(1,"minishell: ",11);
-			write(1,"$",1);
-			write(1,var.dollar,(int)ft_strlen(var.dollar));
-			write(1,": ambiguous redirect\n",21);
-		}
-		*i = *i + (int)ft_strlen(var.value);*i = *i - 1;
+		*i = *i + (int)ft_strlen(get_env(var.dollar,env_list));
+		*i = *i - 1;
 		*start = *start - 1;
 	}
-	return(0);
 }
 
 int	delimiter(char *value, int *start)
