@@ -767,7 +767,8 @@ int     fill_data(t_tokens *tokens, t_data **data,t_envp *env_list)
 					if(error == -1)
 					{
 						type = 7;
-						tokens->value = ft_strdup(env_list->file_name);
+						tokens->value = ft_strdup(env_list->ambiguous->value);
+						env_list->ambiguous = env_list->ambiguous->next;
 					}
 				}
 				redirection_token(&rdt,type,tokens->value);

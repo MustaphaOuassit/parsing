@@ -73,6 +73,30 @@ int	put_in_parcer(t_tokens **head, char *value, int type)
 return(0);
 }
 
+int	fill_data_ambiguous(t_ambiguous **head, char *value)
+{
+	char *tmp;
+
+	tmp = ft_strdup(value);
+	t_ambiguous *new_node = malloc(sizeof(t_ambiguous));
+	t_ambiguous *line;
+	 line = *head;
+	new_node->value = tmp;
+	new_node->next = NULL;
+	if(*head == NULL)
+	{
+		*head = new_node;
+		return(0);
+	}
+
+	while (line->next != NULL)
+	{	
+		line = line->next;
+	}
+	line->next = new_node;
+return(0);
+}
+
 char	*put_diveder(char *data, int value, int *i,int *type)
 {
 	char *token;
@@ -244,7 +268,8 @@ int		len_ambiguous(char *value, int	i)
 {
 	int len;
 
-	if(value[i - 1] != '>')
+	printf("%s\n",value);
+	if(i - 1 >= 0 && value[i - 1] != '>')
 	{
 		while (value[i] != '>')
 			i--;
@@ -269,7 +294,7 @@ char	*fill_ambiguous(char *value, int len, int i)
 	data = (char *)malloc(sizeof(char) * (len + 1));
 	data[len] = '\0';
 	len = 0;
-	if(value[i - 1] != '>')
+	if(i - 1 >= 0 && value[i - 1] != '>')
 	{
 		while (value[i] != '>')
 			i--;
@@ -314,6 +339,7 @@ void	dollar_manipulation(char *value,int *start, int *i,t_envp *env_list)
 			var.file_name = fill_ambiguous(value,var.len, var.tmp);
 			env_list->file_name = ft_strdup(var.file_name);
 			env_list->type = 7;
+			fill_data_ambiguous(&env_list->ambiguous,var.file_name);
 		}
 		*i = *i + (int)ft_strlen(var.value);
 		*i = *i - 1;
@@ -683,6 +709,7 @@ int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt)
 {
 	t_init var;
 	t_tokens *data;
+
 	int i;
 
 	i = 0;
@@ -691,6 +718,7 @@ int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt)
 	var.len = 0;
 	var.redirection = 0;
 	env_list->type = 0;
+	env_list->ambiguous = NULL;
 	initialisation_init(&var.token,&var.token_word,&var.len_dollar,&var.dollar);
 
     while (head != NULL)
@@ -700,6 +728,8 @@ int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt)
 		{
 			if(env_list->type != 7)
 				env_list->type = var.type;
+			if(var.type == 1)
+				env_list->type = 0;
 			var.len = len_word(head->value,i,env_list);
 			if(var.len)
 				var.token_word = put_data_token(&var.len, head->value,&i,env_list);

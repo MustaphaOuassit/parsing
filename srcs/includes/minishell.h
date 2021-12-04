@@ -23,6 +23,10 @@
 # include "../../libraries/libft/libft.h"
 # include <fcntl.h>
 
+typedef		struct s_ambiguous{
+	char	*value;
+	struct s_ambiguous *next;
+}		t_ambiguous;
 
 typedef struct s_envp{
 	char    *key;
@@ -30,6 +34,7 @@ typedef struct s_envp{
 	int     equal;
 	int		type;
 	char	*file_name;
+	t_ambiguous *ambiguous;
 	struct s_envp *next;
 }   t_envp;
 
