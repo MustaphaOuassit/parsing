@@ -674,6 +674,103 @@ char	*fill_file(char *value)
 	return(file_name);
 }
 
+int		len_herdoc(char *value)
+{
+	int i;
+	int len;
+	int check;
+
+	i = 0;
+	len = 0;
+	check = 0;
+	while (value[i])
+	{
+		if(value[i] == '\"')
+		{
+			i++;
+			while (value[i])
+			{
+				if(value[i] == '\"')
+					break;
+				i++;
+				len++;
+			}
+			
+		}
+		else if(value[i] == '\'')
+		{
+			i++;
+			while (value[i])
+			{
+				if(value[i] == '\'')
+					break;
+				i++;
+				len++;
+			}
+		}
+		else
+			len++;
+		i++;
+	}
+	return(len);
+}
+
+char	*fill_herdoc(char *value)
+{
+	int i;
+	int	len;
+	char	*file_name;
+
+	i = 0;
+	len = len_herdoc(value);
+	file_name = (char *)malloc(sizeof(char) * (len + 1));
+	file_name[len] = 0;
+	len = 0;
+	while (file_name[len])
+	{
+		if(value[i] == '\"')
+		{
+			i++;
+			while (value[i])
+			{
+				if(value[i] == '\"')
+					break;
+				file_name[len] = value[i];
+				i++;
+				len++;
+			}
+			
+		}
+		else if(value[i] == '\'')
+		{
+			i++;
+			while (value[i])
+			{
+				if(value[i] == '\'')
+					break;
+				file_name[len] = value[i];
+				i++;
+				len++;
+			}
+		}
+		else
+		{
+			file_name[len] = value[i];
+			len++;
+		}
+		i++;
+	}
+	return(file_name);
+}
+
+char	*filter_value(char *value)
+{
+	char	*file_name;
+
+	file_name = fill_herdoc(value);
+	return(file_name);
+}
+
 char	*filter_file_dollar(char *value, int *error)
 {
 	int	i;
@@ -771,6 +868,8 @@ int     fill_data(t_tokens *tokens, t_data **data,t_envp *env_list)
 						env_list->ambiguous = env_list->ambiguous->next;
 					}
 				}
+				else
+					tokens->value = filter_value(tokens->value);
 				redirection_token(&rdt,type,tokens->value);
 			}
 			else

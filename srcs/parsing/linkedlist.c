@@ -166,13 +166,21 @@ char	*get_env(char *value, t_envp *env_list)
 	i = 0;
 	j = 0;
 	tmp = env_list;
-	dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 3));
-	dollar[(int)ft_strlen(value) + 2] = '\0';
+	if(env_list->type == 5)
+	{
+		dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 2));
+		dollar[(int)ft_strlen(value) + 1] = '\0';
+	}
+	else
+	{
+		dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 3));
+		dollar[(int)ft_strlen(value) + 2] = '\0';
+	}
 	while (dollar[i])
 	{
 		if(i == 0)
 			dollar[i] = '$';
-		else if(i == (int)ft_strlen(dollar) - 1)
+		else if(i == (int)ft_strlen(dollar) - 1 && env_list->type != 5)
 			dollar[i] = '?';
 		else
 		{
@@ -181,6 +189,8 @@ char	*get_env(char *value, t_envp *env_list)
 		}
 		i++;
 	}
+	if(env_list->type == 5)
+		return(dollar);
 	while (tmp != NULL)
 	{
 		if(!ft_strcmp(tmp->key,value))
@@ -193,8 +203,28 @@ char	*get_env(char *value, t_envp *env_list)
 char	*get_env_couts(char *value, t_envp *env_list)
 {
 	t_envp	*tmp;
+	int		i;
+	int		j;
+	char *dollar;
 
+	i = 0;
+	j = 0;
 	tmp = env_list;
+	dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 3));
+	dollar[(int)ft_strlen(value) + 2] = '\0';
+	while (dollar[i])
+	{
+		if(i == 0)
+			dollar[i] = '$';
+		else
+		{
+			dollar[i] = value[j];
+			j++;
+		}
+		i++;
+	}
+	if(env_list->type == 5)
+		return(dollar);
 	while (tmp != NULL)
 	{
 		if(!ft_strcmp(tmp->key,value))
@@ -268,7 +298,6 @@ int		len_ambiguous(char *value, int	i)
 {
 	int len;
 
-	printf("%s\n",value);
 	if(i - 1 >= 0 && value[i - 1] != '>')
 	{
 		while (value[i] != '>')
@@ -727,6 +756,8 @@ int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt)
 		while (i <= (int)ft_strlen(head->value))
 		{
 			if(env_list->type != 7)
+				env_list->type = var.type;
+			if(var.type == 5)
 				env_list->type = var.type;
 			if(var.type == 1)
 				env_list->type = 0;
