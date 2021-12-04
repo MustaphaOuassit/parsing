@@ -575,7 +575,7 @@ int		is_couts(char *value)
 	return(0);
 }
 
-char	*skip_dollar(char *value)
+char	*skip_dollar(char *value, int *error)
 {
 	int i;
 	int	len;
@@ -624,6 +624,11 @@ char	*skip_dollar(char *value)
 		}
 		else
 		{
+			if(value[i] == ' ')
+			{
+				*error = -1;
+				break;
+			}
 			file_name[len] = value[i];
 			len++;
 		}
@@ -678,18 +683,20 @@ char	*filter_file_dollar(char *value, int *error)
 	i = 0;
 	check = is_couts(value);
 	if(check)
-		file_name = skip_dollar(value);
+		file_name = skip_dollar(value,error);
 	else
 	{
 		file_name = fill_file(value);
 		if(file_name[0] == '$')
 			*error = 1;
+		else if(is_space(file_name))
+			*error = -1;
 	}
 	return(file_name);
 }
 
 
-int     fill_data(t_tokens *tokens, t_data **data)
+int     fill_data(t_tokens *tokens, t_data **data,t_envp *env_list)
 {
     t_redirection *rdt;
     t_args *args;
@@ -756,11 +763,11 @@ int     fill_data(t_tokens *tokens, t_data **data)
 				{
 					tokens->value = filter_file_dollar(tokens->value,&error);
 					if(error == 1)
+						type = 7;
+					if(error == -1)
 					{
-						write(1,"minishell: ",11);
-						write(1,tokens->value,(int)ft_strlen(tokens->value));
-						write(1,": ambiguous redirect\n",21);
-						return(1);
+						type = 7;
+						tokens->value = ft_strdup(env_list->file_name);
 					}
 				}
 				redirection_token(&rdt,type,tokens->value);

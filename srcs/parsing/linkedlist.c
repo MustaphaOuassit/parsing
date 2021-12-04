@@ -225,9 +225,73 @@ void	initialisation_var(int *i, int *close, char **dollar, int *len_dollar)
 	*len_dollar = 0;
 }
 
+int		is_space(char *value)
+{
+	int	i;
+
+	i = 0;
+	while (value[i])
+	{
+		if(value[i] == ' ')
+			return(1);
+		i++;
+	}
+	
+	return(0);
+}
+
+int		len_ambiguous(char *value, int	i)
+{
+	int len;
+
+	if(value[i - 1] != '>')
+	{
+		while (value[i] != '>')
+			i--;
+	}
+	len = 0;
+	if(value[i] == '>' || value[i] == '|')
+		i++;
+	while (value[i])
+	{
+		if(value[i] == '>' || value[i] == '|')
+			break;
+		len++;
+		i++;
+	}
+	return(len);
+}
+
+char	*fill_ambiguous(char *value, int len, int i)
+{
+	char *data;
+
+	data = (char *)malloc(sizeof(char) * (len + 1));
+	data[len] = '\0';
+	len = 0;
+	if(value[i - 1] != '>')
+	{
+		while (value[i] != '>')
+			i--;
+	}
+	if(value[i] == '>' || value[i] == '|')
+		i++;
+	while (data[len])
+	{
+		if(value[i] == '>' || value[i] == '|')
+			break;
+		data[len] = value[i];
+		i++;
+		len++;
+	}
+	return(data);
+}
+
 void	dollar_manipulation(char *value,int *start, int *i,t_envp *env_list)
 {
 	t_init var;
+
+	var.tmp = *start;
 	*i = *i + 1;
 	var.dollar = NULL;
 	var.len_dollar = check_dollar(value,*start + 1);
@@ -243,7 +307,15 @@ void	dollar_manipulation(char *value,int *start, int *i,t_envp *env_list)
 	}
 	if(var.dollar)
 	{
-		*i = *i + (int)ft_strlen(get_env(var.dollar,env_list));
+		var.value = get_env(var.dollar,env_list);
+		if(env_list->type == 2 && is_space(var.value))
+		{
+			var.len = len_ambiguous(value,var.tmp);
+			var.file_name = fill_ambiguous(value,var.len, var.tmp);
+			env_list->file_name = ft_strdup(var.file_name);
+			env_list->type = 7;
+		}
+		*i = *i + (int)ft_strlen(var.value);
 		*i = *i - 1;
 		*start = *start - 1;
 	}
@@ -618,6 +690,7 @@ int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt)
 	var.type = 0;
 	var.len = 0;
 	var.redirection = 0;
+	env_list->type = 0;
 	initialisation_init(&var.token,&var.token_word,&var.len_dollar,&var.dollar);
 
     while (head != NULL)
@@ -625,7 +698,8 @@ int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt)
 		initialisation(&i,&var.len,&var.token,&var.token_word);
 		while (i <= (int)ft_strlen(head->value))
 		{
-			env_list->type = var.type;
+			if(env_list->type != 7)
+				env_list->type = var.type;
 			var.len = len_word(head->value,i,env_list);
 			if(var.len)
 				var.token_word = put_data_token(&var.len, head->value,&i,env_list);
@@ -635,6 +709,6 @@ int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt)
 		}
         head = head->next;
     }
-	error = fill_data(data,dt);
+	error = fill_data(data,dt,env_list);
 	return(error);
 }

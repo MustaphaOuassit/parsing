@@ -29,6 +29,7 @@ typedef struct s_envp{
 	char    *value;
 	int     equal;
 	int		type;
+	char	*file_name;
 	struct s_envp *next;
 }   t_envp;
 
@@ -63,10 +64,12 @@ typedef		struct s_init{
 	int len;
 	int close;
 	int i;
+	int	tmp;
 	int len_dollar;
 	int	redirection;
 	char *dollar;
 	char *token;
+	char *file_name;
 }		t_init;
 
 typedef		struct s_redirection{
@@ -123,9 +126,10 @@ void	ft_exit();
 void    parsing(char *cmd, int *error,t_envp *env_list, t_data **data);
 int    list_tokens(t_list **head, char *data);
 int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt);
-int     fill_data(t_tokens *tokens, t_data **data);
+int     fill_data(t_tokens *tokens, t_data **data, t_envp *env_list);
 int		delimiter(char *value, int *start);
 int		delimiter_skip(char *value, int *start);
+int		is_space(char *value);
 
 
 
