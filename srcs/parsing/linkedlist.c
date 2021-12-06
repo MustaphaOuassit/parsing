@@ -295,8 +295,12 @@ int		len_ambiguous(char *value, int	i)
 
 	if(i - 1 >= 0 && value[i - 1] != '>' && value[i - 1] != '<')
 	{
-		while (value[i] != '>' || value[i] != '<')
+		while (value[i])
+		{
+			if(value[i] == '>' || value[i] == '<')
+				break;
 			i--;
+		}
 	}
 	len = 0;
 	if(value[i] == '>' || value[i] == '<' || value[i] == '|')
@@ -320,8 +324,12 @@ char	*fill_ambiguous(char *value, int len, int i)
 	len = 0;
 	if(i - 1 >= 0 && value[i - 1] != '>' && value[i - 1] != '<')
 	{
-		while (value[i] != '>' || value[i] != '<')
+		while (value[i])
+		{
+			if(value[i] == '>' || value[i] == '<')
+				break;
 			i--;
+		}
 	}
 	if(value[i] == '>' || value[i] == '<' || value[i] == '|')
 		i++;

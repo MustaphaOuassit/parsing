@@ -788,6 +788,8 @@ char	*filter_file_dollar(char *value, int *error)
 			*error = 1;
 		else if(is_space(file_name))
 			*error = -1;
+		else
+			file_name = skip_dollar(value,error);
 	}
 	return(file_name);
 }
