@@ -129,7 +129,7 @@ void	ft_exit();
 	word : 6;
 */
 
-void    parsing(char *cmd, int *error,t_envp *env_list, t_data **data);
+int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data);
 int    list_tokens(t_list **head, char *data);
 int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt);
 int     fill_data(t_tokens *tokens, t_data **data, t_envp *env_list);

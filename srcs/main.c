@@ -33,11 +33,11 @@ int main(int argc, char **argv, char **envp)
 	} 
 	if (argc != 1 && !argv[0]) 
         return(-1);
+	env_list->exit_status = 0;
 	while(1)
 	{
 		str = readline("-> minishell ");
 		add_history(str);
-		env_list->exit_status = 0;
 		parsing(str,&error,env_list,&data);
 		if(!error)
 		{

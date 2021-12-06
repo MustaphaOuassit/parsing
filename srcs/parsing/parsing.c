@@ -132,15 +132,33 @@ char     *get_token(char *cmd, int *start)
     return(token);
 }
 
-void    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
+int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
 {
     int start;
     char *token;
     t_list *head;
+    int     i;
 
     head = NULL;
     start = skip_spaces(cmd);
     token = NULL;
+    i = 0;
+    if(cmd[0] == '|' && cmd[1] != '|')
+    {
+        write(1,"minishell: syntax error near unexpected token `|'\n",50);
+        *error = 258;
+        return(0);
+    }
+    while (cmd[i])
+    {
+        if(cmd[i] == '|' && cmd[i + 1] == '|')
+        {
+            write(1,"minishell: syntax error near unexpected token `||'\n",51);
+            *error = 258;
+            return(0);
+        }
+        i++;
+    }
     while (cmd[start])
     {
         if(cmd[start] != ' ')
@@ -157,4 +175,5 @@ void    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
     }
     if(*error != -1)
         *error = check_tokens(head,*error,env_list,data);
+    return(0);
 }
