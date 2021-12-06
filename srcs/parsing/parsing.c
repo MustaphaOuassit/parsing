@@ -148,7 +148,7 @@ void    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
             token = get_token(cmd,&start);
             if(start == -1)
             {
-                *error = -1;
+                *error = 1;
                 break;
             }
             list_tokens(&head,token);
@@ -157,5 +157,4 @@ void    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
     }
     if(*error != -1)
         *error = check_tokens(head,*error,env_list,data);
-    *error = 1;
 }

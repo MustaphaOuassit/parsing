@@ -37,8 +37,8 @@ int main(int argc, char **argv, char **envp)
 	{
 		str = readline("-> minishell ");
 		add_history(str);
+		env_list->exit_status = 0;
 		parsing(str,&error,env_list,&data);
-		error = 0;
 		if(!error)
 		{
 			while (data != NULL)
@@ -65,6 +65,8 @@ int main(int argc, char **argv, char **envp)
 				data = data->next;
 			}
 		}
+		else
+			env_list->exit_status = error;
 
 	// if (1 && is_builtin("export"))
 	// {

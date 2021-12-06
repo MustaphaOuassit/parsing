@@ -849,7 +849,7 @@ int     fill_data(t_tokens *tokens, t_data **data,t_envp *env_list)
 				if(tokens->type == 5)
 					nb_heredoc++;
 				if(error_redirection(check, tokens))
-					return(1);
+					return(258);
 				check = 1;
 				type = tokens->type;
 			}

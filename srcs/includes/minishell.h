@@ -34,6 +34,7 @@ typedef struct s_envp{
 	int     equal;
 	int		type;
 	char	*file_name;
+	int		exit_status;
 	t_ambiguous *ambiguous;
 	struct s_envp *next;
 }   t_envp;

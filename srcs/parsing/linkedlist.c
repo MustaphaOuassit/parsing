@@ -150,7 +150,7 @@ char	*get_env(char *value, t_envp *env_list)
 	j = 0;
 	tmp = env_list;
 	if(value[0] == '?')
-		return("1");
+		return(ft_itoa(env_list->exit_status));
 	if(env_list->type == 5)
 	{
 		dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 2));
@@ -196,7 +196,7 @@ char	*get_env_couts(char *value, t_envp *env_list)
 	j = 0;
 	tmp = env_list;
 	if(value[0] == '?')
-		return("1");
+		return(ft_itoa(env_list->exit_status));
 	dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 3));
 	dollar[(int)ft_strlen(value) + 2] = '\0';
 	while (dollar[i])
