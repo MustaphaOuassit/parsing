@@ -123,7 +123,7 @@ char     *get_token(char *cmd, int *start)
     }
     token = (char *)malloc(sizeof(char) * (len + 1));
     token[len] = '\0';
-    while (token[i])
+    while (i < len)
     {
         token[i] = cmd[*start];
         *start = *start + 1;
@@ -159,7 +159,7 @@ int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
         }
         i++;
     }
-    while (cmd[start])
+    while (start < (int)ft_strlen(cmd))
     {
         if(cmd[start] != ' ')
         {

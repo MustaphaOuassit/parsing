@@ -144,24 +144,28 @@ char	*get_env(char *value, t_envp *env_list)
 	char *dollar;
 	int		i;
 	int		j;
+	int		len;
 	t_envp *tmp;
 
 	i = 0;
 	j = 0;
+	len = 0;
 	tmp = env_list;
 	if(value[0] == '?')
 		return(ft_itoa(env_list->exit_status));
 	if(env_list->type == 5)
 	{
 		dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 2));
+		len = (int)ft_strlen(value) + 1;
 		dollar[(int)ft_strlen(value) + 1] = '\0';
 	}
 	else
 	{
 		dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 3));
+		len = (int)ft_strlen(value) + 2;
 		dollar[(int)ft_strlen(value) + 2] = '\0';
 	}
-	while (dollar[i])
+	while (i < len)
 	{
 		if(i == 0)
 			dollar[i] = '$';
@@ -199,7 +203,7 @@ char	*get_env_couts(char *value, t_envp *env_list)
 		return(ft_itoa(env_list->exit_status));
 	dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 3));
 	dollar[(int)ft_strlen(value) + 2] = '\0';
-	while (dollar[i])
+	while (i < (int)ft_strlen(value) + 2)
 	{
 		if(i == 0)
 			dollar[i] = '$';
@@ -225,8 +229,10 @@ char	*get_env_couts(char *value, t_envp *env_list)
 void	take_dollar(char *value, int *start, t_init *var,t_envp *env_list)
 {
 	char *dollar;
+	int	tmp;
 
 	dollar = NULL;
+	tmp = 0;
 	if(value[*start + 1] == '?')
 	{
 		dollar = "?";
@@ -237,9 +243,10 @@ void	take_dollar(char *value, int *start, t_init *var,t_envp *env_list)
 		var->len_dollar = check_dollar(value,*start + 1);
 		dollar = (char *)malloc(sizeof(char) * (var->len_dollar + 1));
 		dollar[var->len_dollar] = '\0';
+		tmp = var->len_dollar;
 		var->len_dollar = 0;
 		*start = *start + 1;
-		while (dollar[var->len_dollar])
+		while (var->len_dollar < tmp)
 		{
 			dollar[var->len_dollar] = value[*start];
 			var->len_dollar = var->len_dollar + 1;
@@ -318,9 +325,11 @@ int		len_ambiguous(char *value, int	i)
 char	*fill_ambiguous(char *value, int len, int i)
 {
 	char *data;
+	int  tmp;
 
 	data = (char *)malloc(sizeof(char) * (len + 1));
 	data[len] = '\0';
+	tmp = len;
 	len = 0;
 	if(i - 1 >= 0 && value[i - 1] != '>' && value[i - 1] != '<')
 	{
@@ -333,7 +342,7 @@ char	*fill_ambiguous(char *value, int len, int i)
 	}
 	if(value[i] == '>' || value[i] == '<' || value[i] == '|')
 		i++;
-	while (data[len])
+	while (len < tmp)
 	{
 		if(value[i] == '>' || value[i] == '<' || value[i] == '|')
 			break;
@@ -347,10 +356,12 @@ char	*fill_ambiguous(char *value, int len, int i)
 void	dollar_manipulation(char *value,int *start, int *i,t_envp *env_list)
 {
 	t_init var;
+	int		tmp;
 
 	var.tmp = *start;
 	*i = *i + 1;
 	var.dollar = NULL;
+	tmp = 0;
 	if(value[*start + 1] == '?')
 	{
 		var.dollar = "?";
@@ -361,9 +372,10 @@ void	dollar_manipulation(char *value,int *start, int *i,t_envp *env_list)
 		var.len_dollar = check_dollar(value,*start + 1);
 		var.dollar = (char *)malloc(sizeof(char) * (var.len_dollar + 1));
 		var.dollar[var.len_dollar] = '\0';
+		tmp = var.len_dollar;
 		var.len_dollar = 0;
 		*start = *start + 1;
-		while (var.dollar[var.len_dollar])
+		while (var.len_dollar < tmp)
 		{
 			var.dollar[var.len_dollar] = value[*start];
 			var.len_dollar = var.len_dollar + 1;
@@ -477,8 +489,10 @@ char *dollar_value(t_init *vr,int *len, int *i,t_envp *env_list)
 {
 	t_init var;
 	int j;
+	int	tmp;
 
 	j = 0;
+	tmp = 0;
 	if(vr->value[*i + 1] == '?')
 	{
 		var.dollar = "?";
@@ -487,8 +501,9 @@ char *dollar_value(t_init *vr,int *len, int *i,t_envp *env_list)
 	else
 	{
 		var.len_dollar = check_dollar(vr->value,*i + 1);
+		tmp = var.len_dollar;
 		var.dollar = initialisation_dollar(&var.len_dollar,i);
-		while (var.dollar[var.len_dollar])
+		while (var.len_dollar < tmp)
 		{
 			var.dollar[var.len_dollar] = vr->value[*i];
 			var.len_dollar = var.len_dollar + 1;
@@ -618,8 +633,10 @@ void	convert_dollar(t_init *vr, int *i, int *len,t_envp *env_list)
 {
 	t_init var;
 	int		j;
+	int		tmp;
 
 	j = 0;
+	tmp = 0;
 	if(vr->value[*i + 1] == '?')
 	{
 		var.dollar = "?";
@@ -628,8 +645,9 @@ void	convert_dollar(t_init *vr, int *i, int *len,t_envp *env_list)
 	else
 	{
 		var.len_dollar = check_dollar(vr->value,*i + 1);
+		tmp = var.len_dollar;
 		var.dollar = initialisation_dollar(&var.len_dollar,i);
-		while (var.dollar[var.len_dollar])
+		while (var.len_dollar < tmp)
 		{
 			var.dollar[var.len_dollar] = vr->value[*i];
 			var.len_dollar = var.len_dollar + 1;

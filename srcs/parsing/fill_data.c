@@ -66,7 +66,7 @@ char	*convert(char *value)
 	j = 0;
 	error = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 3));
 	error[(int)ft_strlen(value) + 2] = '\0';
-	while (error[i])
+	while (i < (int)ft_strlen(value) + 2)
 	{
 		if(i == 0)
 		{
@@ -340,10 +340,12 @@ char  **filter_args(char *value)
 	char **filter;
 	int tmp;
 	char *vtmp;
+	int  p;
 
 	j = 0;
 	i = 0;
 	r = 0;
+	p = 0;
 	filter = NULL;
 	vtmp = ft_strdup(value);
 	len = get_allocation(vtmp);
@@ -358,8 +360,9 @@ char  **filter_args(char *value)
 			i = len_args(value,&j);
 			filter[r] = (char *)malloc(sizeof(char) * (i + 1));
 			filter[r][i] = '\0';
+			p = i;
 			i = 0;
-			while (filter[r][i])
+			while (i < p)
 			{
 				if(value[tmp] == '\"')
 				{
@@ -579,14 +582,16 @@ char	*skip_dollar(char *value, int *error)
 {
 	int i;
 	int	len;
+	int  tmp;
 	char	*file_name;
 
 	i = 0;
 	len = get_len(value);
+	tmp = len;
 	file_name = (char *)malloc(sizeof(char) * (len + 1));
 	file_name[len] = 0;
 	len = 0;
-	while (file_name[len])
+	while (len < tmp)
 	{
 		if(value[i] == '\"')
 		{
@@ -643,14 +648,16 @@ char	*fill_file(char *value)
 	int		len;
 	char	*file_name;
 	int		check;
+	int     tmp;
 
 	i = 0;
 	check = 0;
 	len = len_file_name(value);
+	tmp = len;
 	file_name = (char *)malloc(sizeof(char) * (len + 1));
 	file_name[len] = '\0';
 	len = 0;
-	while (file_name[len])
+	while (len < tmp)
 	{
 		if(value[i] == '$' && delimiter(value,&i))
 		{
@@ -720,13 +727,15 @@ char	*fill_herdoc(char *value)
 	int i;
 	int	len;
 	char	*file_name;
+	int tmp;
 
 	i = 0;
 	len = len_herdoc(value);
+	tmp = len;
 	file_name = (char *)malloc(sizeof(char) * (len + 1));
 	file_name[len] = 0;
 	len = 0;
-	while (file_name[len])
+	while (len < tmp)
 	{
 		if(value[i] == '\"')
 		{
