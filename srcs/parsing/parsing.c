@@ -107,7 +107,7 @@ int len_token(char *cmd, int start)
    return(var.len); 
 }
 
-char     *get_token(char *cmd, int *start)
+char     *get_token(char *cmd, int *start, t_envp *envp_list)
 {
     int len;
     int i;
@@ -122,6 +122,7 @@ char     *get_token(char *cmd, int *start)
         return(NULL);
     }
     token = (char *)malloc(sizeof(char) * (len + 1));
+    free_in_parcer(&envp_list->allocation,token);
     token[len] = '\0';
     while (i < len)
     {
@@ -138,6 +139,7 @@ int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
     char *token;
     t_list *head;
     int     i;
+    env_list->allocation = NULL;
 
     head = NULL;
     start = skip_spaces(cmd);
@@ -163,7 +165,7 @@ int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
     {
         if(cmd[start] != ' ')
         {
-            token = get_token(cmd,&start);
+            token = get_token(cmd,&start,env_list);
             if(start == -1)
             {
                 *error = 1;

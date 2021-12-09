@@ -23,21 +23,6 @@
 # include "../../libraries/libft/libft.h"
 # include <fcntl.h>
 
-typedef		struct s_ambiguous{
-	char	*value;
-	struct s_ambiguous *next;
-}		t_ambiguous;
-
-typedef struct s_envp{
-	char    *key;
-	char    *value;
-	int     equal;
-	int		type;
-	char	*file_name;
-	int		exit_status;
-	t_ambiguous *ambiguous;
-	struct s_envp *next;
-}   t_envp;
 
 typedef struct s_initialisation
 {
@@ -96,6 +81,27 @@ typedef		struct s_args{
 	struct	s_args *next;
 }			t_args;
 
+typedef		struct s_ambiguous{
+	char	*value;
+	struct s_ambiguous *next;
+}		t_ambiguous;
+
+typedef		struct s_free{
+	char	*value;
+	struct s_free *next;
+}		t_free;
+typedef struct s_envp{
+	char    *key;
+	char    *value;
+	int     equal;
+	int		type;
+	char	*file_name;
+	int		exit_status;
+	t_free		*allocation;
+	t_ambiguous *ambiguous;
+	struct s_envp *next;
+}   t_envp;
+
 //exec
 void	ft_builtins(t_data *data, t_envp **env_list);
 int		is_builtin(char *cmd);
@@ -136,6 +142,7 @@ int     fill_data(t_tokens *tokens, t_data **data, t_envp *env_list);
 int		delimiter(char *value, int *start);
 int		delimiter_skip(char *value, int *start);
 int		is_space(char *value);
+int		free_in_parcer(t_free **head, char *value);
 
 
 

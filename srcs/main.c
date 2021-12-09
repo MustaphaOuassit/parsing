@@ -67,6 +67,12 @@ int main(int argc, char **argv, char **envp)
 		}
 		else
 			env_list->exit_status = error;
+			while (env_list->allocation != NULL)
+			{
+				free(env_list->allocation->value);
+				env_list->allocation = env_list->allocation->next;
+			}
+			
 
 	// if (1 && is_builtin("export"))
 	// {
