@@ -13,9 +13,10 @@
 
 # include "../includes/minishell.h"
 
-int	redirection_token(t_redirection	**head,int type, char *file_name)
+int	redirection_token(t_redirection	**head,int type, char *file_name, t_envp *env_list)
 {
 	t_redirection *new_node = malloc(sizeof(t_redirection));
+	free_in_parcer(&env_list->allocation,new_node,NULL);
 	t_redirection *line;
 
 	line = *head;
@@ -35,9 +36,10 @@ int	redirection_token(t_redirection	**head,int type, char *file_name)
     return(0);  
 }
 
-int	args_token(t_args	**head, char *args)
+int	args_token(t_args	**head, char *args, t_envp *env_list)
 {
 	t_args *new_node = malloc(sizeof(t_redirection));
+	free_in_parcer(&env_list->allocation,new_node,NULL);
 	t_args *line;
 
 	line = *head;
@@ -56,7 +58,7 @@ int	args_token(t_args	**head, char *args)
     return(0);  
 }
 
-char	*convert(char *value)
+char	*convert(char *value,t_envp *env_list)
 {
 	char *error;
 	int i;
@@ -65,6 +67,7 @@ char	*convert(char *value)
 	i = 0;
 	j = 0;
 	error = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 3));
+	free_in_parcer(&env_list->allocation,error,NULL);
 	error[(int)ft_strlen(value) + 2] = '\0';
 	while (i < (int)ft_strlen(value) + 2)
 	{
@@ -88,27 +91,28 @@ char	*convert(char *value)
 	return(error);
 }
 
-void	print_error_rdt(char *value)
+void	print_error_rdt(char *value,t_envp *env_list)
 {
 	char	*error;
 	char	*error_rdt;
 
 	error = "minishell: syntax error near unexpected token ";
 	error_rdt = NULL;
-	error_rdt = convert(value);
+	error_rdt = convert(value,env_list);
 	error = ft_strjoin(error,error_rdt);
+	free_in_parcer(&env_list->allocation,error,NULL);
 	write(1,error,ft_strlen(error));
 	write(1,"\n",1);
 }
 
-int		error_redirection(int check, t_tokens *tokens)
+int		error_redirection(int check, t_tokens *tokens,t_envp *env_list)
 {
 	if(check == 1 || tokens->next == NULL)
 	{
 		if(check == 1)
-			print_error_rdt(tokens->value);
+			print_error_rdt(tokens->value,env_list);
 		else
-			print_error_rdt("newline");
+			print_error_rdt("newline",env_list);
 		return(1);
 	}
 	return(0);
@@ -203,7 +207,7 @@ void	skip_value(char *value, int *start)
 	*start = *start - 1;
 }
 
-int		get_allocation(char *value)
+int		get_allocation(char *value,t_envp *env_list)
 {
 	int i;
 	int len;
@@ -266,6 +270,7 @@ int		get_allocation(char *value)
 	}
 
 	split = ft_split(value,' ');
+	free_in_parcer(&env_list->allocation,NULL,split);
 	i  = 0;
 	while (split[i])
 		i++;
@@ -331,7 +336,7 @@ int		len_args(char *value ,int *start)
 	return(len);
 }
 
-char  **filter_args(char *value)
+char  **filter_args(char *value,t_envp *env_list)
 {
 	int j;
 	int i;
@@ -348,10 +353,12 @@ char  **filter_args(char *value)
 	p = 0;
 	filter = NULL;
 	vtmp = ft_strdup(value);
-	len = get_allocation(vtmp);
+	free_in_parcer(&env_list->allocation,vtmp,NULL);
+	len = get_allocation(vtmp,env_list);
 	if(len)
 	{
 		filter = (char **)malloc(sizeof(char *) * (len + 1));
+		free_in_parcer(&env_list->allocation,NULL,filter);
 		filter[len] = 0;
 		j = 0;
 		tmp = 0;
@@ -359,6 +366,7 @@ char  **filter_args(char *value)
 		{
 			i = len_args(value,&j);
 			filter[r] = (char *)malloc(sizeof(char) * (i + 1));
+			free_in_parcer(&env_list->allocation,filter[r],NULL);
 			filter[r][i] = '\0';
 			p = i;
 			i = 0;
@@ -416,15 +424,16 @@ char  **filter_args(char *value)
 	return(filter);
 }
 
-int	all_data(t_data	**head, t_redirection *rdt, char **arguments, int nb_heredoc)
+int	all_data(t_data	**head, t_redirection *rdt, char **arguments, t_envp *env_list)
 {
 	t_data *new_node = malloc(sizeof(t_data));
+	free_in_parcer(&env_list->allocation,new_node,NULL);
 	t_data *line;
 
 	line = *head;
 	new_node->arguments = arguments;
 	new_node->redirection = rdt;
-	new_node->nb_heredoc = nb_heredoc;
+	new_node->nb_heredoc = env_list->nb_herdoc;
 	new_node->next = NULL;
 	if(*head == NULL)
 	{
@@ -578,7 +587,7 @@ int		is_couts(char *value)
 	return(0);
 }
 
-char	*skip_dollar(char *value, int *error)
+char	*skip_dollar(char *value, int *error,t_envp *env_list)
 {
 	int i;
 	int	len;
@@ -589,6 +598,7 @@ char	*skip_dollar(char *value, int *error)
 	len = get_len(value);
 	tmp = len;
 	file_name = (char *)malloc(sizeof(char) * (len + 1));
+	free_in_parcer(&env_list->allocation,file_name,NULL);
 	file_name[len] = 0;
 	len = 0;
 	while (len < tmp)
@@ -642,7 +652,7 @@ char	*skip_dollar(char *value, int *error)
 	return(file_name);
 }
 
-char	*fill_file(char *value)
+char	*fill_file(char *value, t_envp *env_list)
 {
 	int i;
 	int		len;
@@ -655,6 +665,7 @@ char	*fill_file(char *value)
 	len = len_file_name(value);
 	tmp = len;
 	file_name = (char *)malloc(sizeof(char) * (len + 1));
+	free_in_parcer(&env_list->allocation,file_name,NULL);
 	file_name[len] = '\0';
 	len = 0;
 	while (len < tmp)
@@ -722,7 +733,7 @@ int		len_herdoc(char *value)
 	return(len);
 }
 
-char	*fill_herdoc(char *value)
+char	*fill_herdoc(char *value,t_envp *env_list)
 {
 	int i;
 	int	len;
@@ -733,6 +744,7 @@ char	*fill_herdoc(char *value)
 	len = len_herdoc(value);
 	tmp = len;
 	file_name = (char *)malloc(sizeof(char) * (len + 1));
+	free_in_parcer(&env_list->allocation,file_name,NULL);
 	file_name[len] = 0;
 	len = 0;
 	while (len < tmp)
@@ -772,15 +784,15 @@ char	*fill_herdoc(char *value)
 	return(file_name);
 }
 
-char	*filter_value(char *value)
+char	*filter_value(char *value,t_envp *env_list)
 {
 	char	*file_name;
 
-	file_name = fill_herdoc(value);
+	file_name = fill_herdoc(value,env_list);
 	return(file_name);
 }
 
-char	*filter_file_dollar(char *value, int *error)
+char	*filter_file_dollar(char *value, int *error, t_envp *env_list)
 {
 	int	i;
 	char	*file_name;
@@ -789,16 +801,16 @@ char	*filter_file_dollar(char *value, int *error)
 	i = 0;
 	check = is_couts(value);
 	if(check)
-		file_name = skip_dollar(value,error);
+		file_name = skip_dollar(value,error,env_list);
 	else
 	{
-		file_name = fill_file(value);
+		file_name = fill_file(value,env_list);
 		if(file_name[0] == '$')
 			*error = 1;
 		else if(is_space(file_name))
 			*error = -1;
 		else
-			file_name = skip_dollar(value,error);
+			file_name = skip_dollar(value,error,env_list);
 	}
 	return(file_name);
 }
@@ -838,6 +850,7 @@ int     fill_data(t_tokens *tokens, t_data **data,t_envp *env_list)
 		{
 			pipe = 1;
 			arguments = (char **)malloc(sizeof(char *) * (len + 1));
+			free_in_parcer(&env_list->allocation,NULL,arguments);
 			t = 0;
 			while (args != NULL)
 			{
@@ -846,7 +859,8 @@ int     fill_data(t_tokens *tokens, t_data **data,t_envp *env_list)
 				args = args->next;
 			}
 			arguments[len] = 0;
-			all_data(data,rdt,arguments,nb_heredoc);
+			env_list->nb_herdoc = nb_heredoc;
+			all_data(data,rdt,arguments,env_list);
 			rdt = NULL;
 			len = 0;
 			nb_heredoc = 0;
@@ -859,7 +873,7 @@ int     fill_data(t_tokens *tokens, t_data **data,t_envp *env_list)
 			{
 				if(tokens->type == 5)
 					nb_heredoc++;
-				if(error_redirection(check, tokens))
+				if(error_redirection(check, tokens,env_list))
 					return(258);
 				check = 1;
 				type = tokens->type;
@@ -869,29 +883,30 @@ int     fill_data(t_tokens *tokens, t_data **data,t_envp *env_list)
 				check = 0;
 				if(type != 5)
 				{
-					tokens->value = filter_file_dollar(tokens->value,&error);
+					tokens->value = filter_file_dollar(tokens->value,&error,env_list);
 					if(error == 1)
 						type = 7;
 					if(error == -1)
 					{
 						type = 7;
 						tokens->value = ft_strdup(env_list->ambiguous->value);
+						free_in_parcer(&env_list->allocation,tokens->value,NULL);
 						env_list->ambiguous = env_list->ambiguous->next;
 					}
 				}
 				else
-					tokens->value = filter_value(tokens->value);
-				redirection_token(&rdt,type,tokens->value);
+					tokens->value = filter_value(tokens->value,env_list);
+				redirection_token(&rdt,type,tokens->value,env_list);
 			}
 			else
 			{
-				filter = filter_args(tokens->value);
+				filter = filter_args(tokens->value,env_list);
 				if(filter)
 				{
 					j = 0;
 					while (filter[j])
 					{
-						args_token(&args,filter[j]);
+						args_token(&args,filter[j],env_list);
 						len++;
 						j++;
 					}
@@ -903,6 +918,7 @@ int     fill_data(t_tokens *tokens, t_data **data,t_envp *env_list)
 	if(pipe == 0)
 	{
 			arguments = (char **)malloc(sizeof(char *) * (len + 1));
+			free_in_parcer(&env_list->allocation,NULL,arguments);
 			t = 0;
 			while (args != NULL)
 			{
@@ -911,7 +927,8 @@ int     fill_data(t_tokens *tokens, t_data **data,t_envp *env_list)
 				args = args->next;
 			}
 			arguments[len] = 0;
-			all_data(data,rdt,arguments,nb_heredoc);
+			env_list->nb_herdoc = nb_heredoc;
+			all_data(data,rdt,arguments,env_list);
 			rdt = NULL;
 			len = 0;
 			nb_heredoc = 0;

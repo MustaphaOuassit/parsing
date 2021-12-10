@@ -122,7 +122,7 @@ char     *get_token(char *cmd, int *start, t_envp *envp_list)
         return(NULL);
     }
     token = (char *)malloc(sizeof(char) * (len + 1));
-    free_in_parcer(&envp_list->allocation,token);
+    free_in_parcer(&envp_list->allocation,token,NULL);
     token[len] = '\0';
     while (i < len)
     {
@@ -171,7 +171,7 @@ int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
                 *error = 1;
                 break;
             }
-            list_tokens(&head,token);
+            list_tokens(&head,token,env_list);
         }
         start++;
     }

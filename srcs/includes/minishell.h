@@ -87,7 +87,8 @@ typedef		struct s_ambiguous{
 }		t_ambiguous;
 
 typedef		struct s_free{
-	char	*value;
+	void	*value;
+	char	**table;
 	struct s_free *next;
 }		t_free;
 typedef struct s_envp{
@@ -97,6 +98,7 @@ typedef struct s_envp{
 	int		type;
 	char	*file_name;
 	int		exit_status;
+	int		nb_herdoc;
 	t_free		*allocation;
 	t_ambiguous *ambiguous;
 	struct s_envp *next;
@@ -136,13 +138,13 @@ void	ft_exit();
 */
 
 int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data);
-int    list_tokens(t_list **head, char *data);
+int    list_tokens(t_list **head, char *data, t_envp *env_list);
 int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt);
 int     fill_data(t_tokens *tokens, t_data **data, t_envp *env_list);
 int		delimiter(char *value, int *start);
 int		delimiter_skip(char *value, int *start);
 int		is_space(char *value);
-int		free_in_parcer(t_free **head, char *value);
+int		free_in_parcer(t_free **head, void *value, char	**table);
 
 
 
