@@ -72,6 +72,9 @@ int main(int argc, char **argv, char **envp)
 		}
 		else
 			env_list->exit_status = error;
+
+
+			
 		while (env_list->allocation != NULL)
 		{
 			tmp = env_list->allocation->next;

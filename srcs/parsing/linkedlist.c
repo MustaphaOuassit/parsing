@@ -18,9 +18,7 @@ void	free_two(char **table)
 	int	i;
 
 	i = 0;
-	if (table == NULL || *table == NULL)
-		return ;
-	while (*(table + i))
+	while (table[i])
 	{
 		free(table[i]);
 		table[i] = NULL;
