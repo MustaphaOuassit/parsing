@@ -76,7 +76,7 @@ char	*convert(char *value,t_envp *env_list)
 			error[i] = '`';
 			i++;
 		}
-		else if(i == (int)ft_strlen(error) - 1)
+		else if(i == (int)ft_strlen(value) + 1)
 		{
 			error[i] = '\'';
 			i++;

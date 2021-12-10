@@ -18,13 +18,17 @@ int main(int argc, char **argv, char **envp)
 	int i;
 	t_data *data;
     t_envp *env_list;
+	t_free *tmp;
 	int j;
+	int	len;
 	int error;
 
 	i = 0;
 	j = 0;
+
 	error = 0;
 	data = NULL;
+	tmp = NULL;
 
 	while(envp[i])
 	{
@@ -36,6 +40,7 @@ int main(int argc, char **argv, char **envp)
 	env_list->exit_status = 0;
 	while(1)
 	{
+		len = 0;
 		str = readline("-> minishell ");
 		add_history(str);
 		parsing(str,&error,env_list,&data);
@@ -60,14 +65,28 @@ int main(int argc, char **argv, char **envp)
 				data->redirection = data->redirection->next;
 			}
 				printf("\n");
-				printf("Heredoc :\n");
+				printf("Herdoc :\n");
 				printf("%d\n",data->nb_heredoc);
 				data = data->next;
 			}
 		}
 		else
 			env_list->exit_status = error;
-
+		while (env_list->allocation != NULL)
+		{
+			tmp = env_list->allocation->next;
+			if(env_list->allocation->value)
+				free(env_list->allocation->value);
+			if(env_list->allocation->table && !len)
+			{
+				free_two(env_list->allocation->table);
+				env_list->allocation->table = NULL;
+			}
+			len++;
+			free(env_list->allocation);
+			env_list->allocation = tmp;
+		}
+		free(str);
 	// if (1 && is_builtin("export"))
 	// {
 	// 	printf("%s\n", data->arguments[0]);

@@ -13,6 +13,23 @@
 
 # include "../includes/minishell.h"
 
+void	free_two(char **table)
+{
+	int	i;
+
+	i = 0;
+	if (table == NULL || *table == NULL)
+		return ;
+	while (*(table + i))
+	{
+		free(table[i]);
+		table[i] = NULL;
+		i++;
+	}
+	free(table);
+	table = NULL;
+}
+
 int    list_tokens(t_list **head, char *data, t_envp *env_list)
 {
     t_list *new_node = malloc(sizeof(t_list));
@@ -89,7 +106,6 @@ int	free_in_parcer(t_free **head, void *value, char	**table)
 		*head = new_node;
 		return(0);
 	}
-
 	while (line->next != NULL)
 	{	
 		line = line->next;

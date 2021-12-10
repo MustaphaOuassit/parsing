@@ -145,6 +145,7 @@ int		delimiter(char *value, int *start);
 int		delimiter_skip(char *value, int *start);
 int		is_space(char *value);
 int		free_in_parcer(t_free **head, void *value, char	**table);
+void	free_two(char **table);
 
 
 
