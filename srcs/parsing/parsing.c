@@ -144,22 +144,45 @@ int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
     head = NULL;
     start = skip_spaces(cmd);
     token = NULL;
-    i = 0;
-    if(cmd[0] == '|' && cmd[1] != '|')
+    i = start;
+    if(cmd[start] == '|' && cmd[start + 1] != '|')
     {
         write(1,"minishell: syntax error near unexpected token `|'\n",50);
         *error = 258;
         return(0);
     }
+    if(cmd[start] == '|' && cmd[start + 1] == '|')
+    {
+        write(1,"minishell: syntax error near unexpected token `||'\n",51);
+        *error = 258;
+        return(0);
+    }
     while (cmd[i])
     {
-        if(cmd[i] == '|' && cmd[i + 1] == '|')
+        if(cmd[i] == '|')
         {
-            write(1,"minishell: syntax error near unexpected token `||'\n",51);
-            *error = 258;
-            return(0);
+            i++;
+            while (cmd[i])
+            {
+                if(cmd[i] == ' ')
+                    i++;
+                else if(cmd[i] == '|')
+                {
+                    write(1,"minishell: syntax error near unexpected token `|'\n",51);
+                    *error = 258;
+                    return(0);
+                }
+                else
+                    break;
+            }
         }
         i++;
+    }
+    if(cmd[(int)ft_strlen(cmd) - 1] == '|')
+    {
+        write(1,"minishell: syntax error near unexpected token `|'\n",51);
+        *error = 258;
+         return(0);
     }
     while (start < (int)ft_strlen(cmd))
     {
