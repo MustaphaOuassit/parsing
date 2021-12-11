@@ -133,9 +133,24 @@ char     *get_token(char *cmd, int *start, t_envp *envp_list)
     return(token);
 }
 
+int     end_str(char *cmd)
+{
+    int i;
+
+    i = (int)ft_strlen(cmd) - 1;
+    while (cmd[i])
+    {
+        if (cmd[i] != ' ')
+            break;
+        i--;
+    }
+    return(i);
+}
+
 int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
 {
     int start;
+    int end;
     char *token;
     t_list *head;
     int     i;
@@ -143,6 +158,7 @@ int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
 
     head = NULL;
     start = skip_spaces(cmd);
+    end = end_str(cmd);
     token = NULL;
     i = start;
     if(cmd[start] == '|' && cmd[start + 1] != '|')
@@ -159,6 +175,42 @@ int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
     }
     while (cmd[i])
     {
+        if(cmd[i] == '\"')
+        {
+            i++;
+            if(!check_close(cmd,i,'\"'))
+            {
+                *error = 1;
+                return(0);
+            }
+            while (cmd[i])
+            {
+                if(cmd[i] == '\"')
+                {
+                    i++;
+                    break;
+                }
+                i++;
+            }
+        }
+        else if(cmd[i] == '\'')
+        {
+            i++;
+            if(!check_close(cmd,i,'\''))
+            {
+                *error = 1;
+                return(0);
+            }
+            while (cmd[i])
+            {
+                if(cmd[i] == '\'')
+                {
+                    i++;
+                    break;
+                }
+                i++;
+            }
+        }
         if(cmd[i] == '|')
         {
             i++;
@@ -178,11 +230,11 @@ int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data)
         }
         i++;
     }
-    if(cmd[(int)ft_strlen(cmd) - 1] == '|')
+    if(cmd[end] == '|')
     {
         write(1,"minishell: syntax error near unexpected token `|'\n",51);
         *error = 258;
-         return(0);
+        return(0);
     }
     while (start < (int)ft_strlen(cmd))
     {
