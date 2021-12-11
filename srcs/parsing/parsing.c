@@ -138,6 +138,8 @@ int     end_str(char *cmd)
     int i;
 
     i = (int)ft_strlen(cmd) - 1;
+    if(i < 0)
+        return(0);
     while (cmd[i])
     {
         if (cmd[i] != ' ')

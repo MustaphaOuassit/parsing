@@ -43,6 +43,7 @@ int main(int argc, char **argv, char **envp)
 		len = 0;
 		str = readline("-> minishell ");
 		add_history(str);
+		data = NULL;
 		parsing(str,&error,env_list,&data);
 		if(!error)
 		{
