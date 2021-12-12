@@ -55,6 +55,7 @@ typedef		struct s_init{
 	int len;
 	int close;
 	int i;
+	int j;
 	int	end;
 	int	tmp;
 	int len_dollar;

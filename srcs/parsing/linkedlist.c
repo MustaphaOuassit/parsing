@@ -183,34 +183,35 @@ int		check_dollar(char *value, int start)
 	return(len);
 }
 
-char	*get_env(char *value, t_envp *env_list)
+char *dollar_allocation(char *value, int *len, t_envp *env_list)
 {
 	char *dollar;
-	int		i;
-	int		j;
-	int		len;
-	t_envp *tmp;
 
-	i = 0;
-	j = 0;
-	len = 0;
-	tmp = env_list;
-	if(value[0] == '?')
-		return(ft_itoa(env_list->exit_status));
+	dollar = NULL;
 	if(env_list->type == 5)
 	{
 		dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 2));
 		free_in_parcer(&env_list->allocation,dollar,NULL);
-		len = (int)ft_strlen(value) + 1;
+		*len = (int)ft_strlen(value) + 1;
 		dollar[(int)ft_strlen(value) + 1] = '\0';
 	}
 	else
 	{
 		dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 3));
 		free_in_parcer(&env_list->allocation,dollar,NULL);
-		len = (int)ft_strlen(value) + 2;
+		*len = (int)ft_strlen(value) + 2;
 		dollar[(int)ft_strlen(value) + 2] = '\0';
 	}
+	return(dollar);
+}
+
+char	*fill_dollar_two(char *dollar, char *value, int len, t_envp *env_list)
+{
+	int i;
+	int j;
+
+	i = 0;
+	j = 0;
 	while (i < len)
 	{
 		if(i == 0)
@@ -224,6 +225,21 @@ char	*get_env(char *value, t_envp *env_list)
 		}
 		i++;
 	}
+	return(dollar);
+}
+
+char	*get_env(char *value, t_envp *env_list)
+{
+	char *dollar;
+	int		len;
+	t_envp *tmp;
+
+	len = 0;
+	tmp = env_list;
+	if(value[0] == '?')
+		return(ft_itoa(env_list->exit_status));
+	dollar = dollar_allocation(value,&len,env_list);
+	dollar = fill_dollar_two(dollar,value,len,env_list);
 	if(env_list->type == 5)
 		return(dollar);
 	while (tmp != NULL)
@@ -235,18 +251,14 @@ char	*get_env(char *value, t_envp *env_list)
 	return(dollar);
 }
 
-char	*get_env_couts(char *value, t_envp *env_list)
+char	*fill_dollar_one(char *value,t_envp *env_list)
 {
-	t_envp	*tmp;
-	int		i;
-	int		j;
 	char *dollar;
+	int	i;
+	int j;
 
 	i = 0;
 	j = 0;
-	tmp = env_list;
-	if(value[0] == '?')
-		return(ft_itoa(env_list->exit_status));
 	dollar = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 3));
 	free_in_parcer(&env_list->allocation,dollar,NULL);
 	dollar[(int)ft_strlen(value) + 2] = '\0';
@@ -261,6 +273,19 @@ char	*get_env_couts(char *value, t_envp *env_list)
 		}
 		i++;
 	}
+	return(dollar);
+}
+
+char	*get_env_couts(char *value, t_envp *env_list)
+{
+	t_envp	*tmp;
+	char *dollar;
+
+
+	tmp = env_list;
+	if(value[0] == '?')
+		return(ft_itoa(env_list->exit_status));
+	dollar = fill_dollar_one(value,env_list);
 	if(env_list->type == 5)
 		return(dollar);
 	while (tmp != NULL)
@@ -273,40 +298,50 @@ char	*get_env_couts(char *value, t_envp *env_list)
 	return("\0");
 }
 
-void	take_dollar(char *value, int *start, t_init *var,t_envp *env_list)
+void	continue_len(char *dollar, t_init *var, int *start, t_envp *env_list)
 {
-	char *dollar;
-	int	tmp;
-
-	dollar = NULL;
-	tmp = 0;
-	if(value[*start + 1] == '?')
-	{
-		dollar = "?";
-		*start = *start + 2;
-	}
-	else
-	{
-		var->len_dollar = check_dollar(value,*start + 1);
-		dollar = (char *)malloc(sizeof(char) * (var->len_dollar + 1));
-		free_in_parcer(&env_list->allocation,dollar,NULL);
-		dollar[var->len_dollar] = '\0';
-		tmp = var->len_dollar;
-		var->len_dollar = 0;
-		*start = *start + 1;
-		while (var->len_dollar < tmp)
-		{
-			dollar[var->len_dollar] = value[*start];
-			var->len_dollar = var->len_dollar + 1;
-			*start = *start + 1;
-		}
-	}
 	if(dollar)
 	{
 		var->i = var->i + (int)ft_strlen(get_env_couts(dollar,env_list));
 		var->i = var->i - 1;
 		*start = *start - 1;
 	}
+}
+
+char	*check_status(int *start)
+{
+	t_init vr;
+
+	vr.dollar = "?";
+	*start = *start + 2;
+	return (vr.dollar);
+}
+
+void	take_dollar(char *value, int *start, t_init *var,t_envp *env_list)
+{
+	t_init vr;
+
+	vr.dollar = NULL;
+	vr.tmp = 0;
+	if(value[*start + 1] == '?')
+		vr.dollar = check_status(start);
+	else
+	{
+		var->len_dollar = check_dollar(value,*start + 1);
+		vr.dollar = (char *)malloc(sizeof(char) * (var->len_dollar + 1));
+		free_in_parcer(&env_list->allocation,vr.dollar,NULL);
+		vr.dollar[var->len_dollar] = '\0';
+		vr.tmp = var->len_dollar;
+		var->len_dollar = 0;
+		*start = *start + 1;
+		while (var->len_dollar < vr.tmp)
+		{
+			vr.dollar[var->len_dollar] = value[*start];
+			var->len_dollar = var->len_dollar + 1;
+			*start = *start + 1;
+		}
+	}
+	continue_len(vr.dollar,var,start,env_list);
 }
 
 void	take_couts(int *start, char *value, int *i)
@@ -344,6 +379,16 @@ int		is_space(char *value)
 	return(0);
 }
 
+int		check_indice(int *i)
+{
+	if(*i < 0)
+	{
+		*i = 0;
+		return(1);
+	}
+	return(0);
+}
+
 int		len_ambiguous(char *value, int	i)
 {
 	int len;
@@ -355,6 +400,8 @@ int		len_ambiguous(char *value, int	i)
 			if(value[i] == '>' || value[i] == '<')
 				break;
 			i--;
+			if(check_indice(&i))
+				break;
 		}
 	}
 	len = 0;
@@ -370,6 +417,24 @@ int		len_ambiguous(char *value, int	i)
 	return(len);
 }
 
+void	check_start(int *i, char *value)
+{
+	if(*i - 1 >= 0 && value[*i - 1] != '>' && value[*i - 1] != '<')
+	{
+		while (value[*i])
+		{
+			if(value[*i] == '>' || value[*i] == '<')
+				break;
+			*i = *i - 1;
+			if(*i < 0)
+			{
+				*i = 0;
+				break;
+			}
+		}
+	}
+}
+
 char	*fill_ambiguous(char *value, int len, int i, t_envp *env_list)
 {
 	char *data;
@@ -380,15 +445,7 @@ char	*fill_ambiguous(char *value, int len, int i, t_envp *env_list)
 	data[len] = '\0';
 	tmp = len;
 	len = 0;
-	if(i - 1 >= 0 && value[i - 1] != '>' && value[i - 1] != '<')
-	{
-		while (value[i])
-		{
-			if(value[i] == '>' || value[i] == '<')
-				break;
-			i--;
-		}
-	}
+	check_start(&i,value);
 	if(value[i] == '>' || value[i] == '<' || value[i] == '|')
 		i++;
 	while (len < tmp)
@@ -402,14 +459,24 @@ char	*fill_ambiguous(char *value, int len, int i, t_envp *env_list)
 	return(data);
 }
 
-void	dollar_manipulation(char *value,int *start, int *i,t_envp *env_list)
+void	fill_dollar(t_init *var,int tmp ,char *value, int *start)
+{
+	int i;
+
+	i = 0;
+	while (i < tmp)
+		{
+			var->dollar[i] = value[*start];
+			i++;
+			*start = *start + 1;
+		}
+}
+
+char *fill_convert_three(char *value, int *start, t_envp *env_list)
 {
 	t_init var;
-	int		tmp;
+	int tmp;
 
-	var.tmp = *start;
-	*i = *i + 1;
-	var.dollar = NULL;
 	tmp = 0;
 	if(value[*start + 1] == '?')
 	{
@@ -423,15 +490,22 @@ void	dollar_manipulation(char *value,int *start, int *i,t_envp *env_list)
 		free_in_parcer(&env_list->allocation,var.dollar,NULL);
 		var.dollar[var.len_dollar] = '\0';
 		tmp = var.len_dollar;
-		var.len_dollar = 0;
 		*start = *start + 1;
-		while (var.len_dollar < tmp)
-		{
-			var.dollar[var.len_dollar] = value[*start];
-			var.len_dollar = var.len_dollar + 1;
-			*start = *start + 1;
-		}
+		fill_dollar(&var,tmp,value,start);
 	}
+	return(var.dollar);
+}
+
+void	dollar_manipulation(char *value,int *start, int *i,t_envp *env_list)
+{
+	t_init var;
+	int		tmp;
+
+	var.tmp = *start;
+	*i = *i + 1;
+	var.dollar = NULL;
+	tmp = 0;
+	var.dollar = fill_convert_three(value,start,env_list);
 	if(var.dollar)
 	{
 		var.value = get_env(var.dollar,env_list);
@@ -537,13 +611,31 @@ char	*initialisation_dollar(int *len_dollar, int *i, t_envp *env_list)
 	return(dollar);
 }
 
+char *fill_convert_two(char *dollar, t_envp *env_list, int *len, char *token_word)
+{
+	int j;
+
+	j = 0;
+	if(dollar)
+	{
+		dollar = ft_strdup(get_env_couts(dollar,env_list));
+		free_in_parcer(&env_list->allocation,dollar,NULL);
+		while (dollar[j])
+		{
+			token_word[*len] = dollar[j];
+			*len = *len + 1;
+			j++;
+		}
+		dollar = NULL;
+	}
+	return(token_word);
+}
+
 char *dollar_value(t_init *vr,int *len, int *i,t_envp *env_list)
 {
 	t_init var;
-	int j;
 	int	tmp;
 
-	j = 0;
 	tmp = 0;
 	if(vr->value[*i + 1] == '?')
 	{
@@ -562,19 +654,8 @@ char *dollar_value(t_init *vr,int *len, int *i,t_envp *env_list)
 			*i = *i + 1;
 		}
 	}
-	if(var.dollar)
-	{
-		var.dollar = ft_strdup(get_env_couts(var.dollar,env_list));
-		free_in_parcer(&env_list->allocation,var.dollar,NULL);
-		j = 0;
-		while (var.dollar[j])
-		{
-			vr->token_word[*len] = var.dollar[j];
-			*len = *len + 1;
-			j++;
-		}
-		var.dollar = NULL;
-	}
+	vr->token_word = fill_convert_two(var.dollar,env_list,len,vr->token_word);
+
 	return(vr->token_word);
 }
 
@@ -648,10 +729,6 @@ char *word_single_couts(int *i,int *len,t_init *var)
 		var->token_word[*len] = var->value[*i];
 		*len = *len + 1;
 		*i = *i + 1;
-
-			// var->token_word[*len] = var->value[*i];
-			// *len = *len + 1;
-			// *i = *i + 1;
 			break;
 		}
 		if(var->value[*i - 1] == '\'')
@@ -683,6 +760,25 @@ char	*initialisation_token(int *len, t_envp *env_list)
 	return(token_word);
 }
 
+void	fill_convert(char *value, t_envp *env_list,int *len,char *token_word)
+{
+	int j;
+
+	j = 0;
+	if(value)
+	{
+		value = ft_strdup(get_env(value,env_list));
+		free_in_parcer(&env_list->allocation,value,NULL);
+		while (value[j])
+		{
+			token_word[*len] = value[j];
+			*len = *len + 1;
+			j++;
+		}
+		value = NULL;
+	}
+}
+
 void	convert_dollar(t_init *vr, int *i, int *len,t_envp *env_list)
 {
 	t_init var;
@@ -708,19 +804,7 @@ void	convert_dollar(t_init *vr, int *i, int *len,t_envp *env_list)
 			*i = *i + 1;
 		}
 	}
-	if(var.dollar)
-	{
-		var.dollar = ft_strdup(get_env(var.dollar,env_list));
-		free_in_parcer(&env_list->allocation,var.dollar,NULL);
-		j = 0;
-		while (var.dollar[j])
-		{
-			vr->token_word[*len] = var.dollar[j];
-			*len = *len + 1;
-			j++;
-		}
-		var.dollar = NULL;
-	}
+	fill_convert(var.dollar,env_list,len,vr->token_word);
 }
 
 void	continue_add(t_init *var, int *len,int *i)
@@ -728,6 +812,14 @@ void	continue_add(t_init *var, int *len,int *i)
 	var->token_word[*len] = var->value[*i];
 	*i = *i + 1;
 	*len = *len + 1;
+}
+
+void	continue_dollar(t_init *var, int *i, int *len, t_envp *env_list)
+{
+	if(var->value[*i] == '$' && delimiter(var->value,i))
+		convert_dollar(var,i,len,env_list);
+	else
+		continue_add(var,len,i);
 }
 
 char *put_data_token(int *len, char *value, int *i, t_envp *env_list)
@@ -741,7 +833,7 @@ char *put_data_token(int *len, char *value, int *i, t_envp *env_list)
 		if(value[*i] == '\"')
 			var.token_word = word_double_couts(i, len,&var,env_list);
 		else if(var.value[*i] == '\'')
-		var.token_word = word_single_couts(i,len,&var);
+			var.token_word = word_single_couts(i,len,&var);
 		else if(var.value[*i] == '>' || var.value[*i] == '<' ||
 		var.value[*i] == '|')
 		{
@@ -749,12 +841,7 @@ char *put_data_token(int *len, char *value, int *i, t_envp *env_list)
 			break;
 		}
 		else
-		{
-			if(var.value[*i] == '$' && delimiter(var.value,i))
-				convert_dollar(&var,i,len,env_list);
-			else
-				continue_add(&var,len,i);
-		}
+			 continue_dollar(&var,i,len,env_list);
 	}
 	*i = *i - 1;
 	return(var.token_word);
@@ -807,41 +894,48 @@ int		allocation_envp(t_envp *data)
 	return(len);
 }
 
+void	initialisation_envp(t_tokens **data, t_init *var, t_envp *env_list)
+{
+	*data = NULL;
+	var->type = 0;
+	var->len = 0;
+	var->redirection = 0;
+	env_list->type = 0;
+	env_list->ambiguous = NULL;
+}
+
+void	check_type(t_envp *env_list, int type)
+{
+	if(env_list->type != 7)
+		env_list->type = type;
+	if(type == 5)
+		env_list->type = type;
+	if(type == 1)
+		env_list->type = 0;
+}
+
 int    check_tokens(t_list *head, int error,t_envp *env_list, t_data **dt)
 {
 	t_init var;
 	t_tokens *data;
-
-	int i;
-
-	i = 0;
-	data = NULL;
-	var.type = 0;
-	var.len = 0;
-	var.redirection = 0;
-	env_list->type = 0;
-	env_list->ambiguous = NULL;
+	
+	var.j = 0;
+	initialisation_envp(&data,&var,env_list);
 	initialisation_init(&var.token,&var.token_word,&var.len_dollar,&var.dollar);
-
     while (head != NULL)
     {
-		initialisation(&i,&var.len,&var.token,&var.token_word);
-		while (i <= (int)ft_strlen(head->value))
+		initialisation(&var.j,&var.len,&var.token,&var.token_word);
+		while (var.j <= (int)ft_strlen(head->value))
 		{
-			if(env_list->type != 7)
-				env_list->type = var.type;
-			if(var.type == 5)
-				env_list->type = var.type;
-			if(var.type == 1)
-				env_list->type = 0;
-			var.len = len_word(head->value,i,env_list);
+			check_type(env_list,var.type);
+			var.len = len_word(head->value,var.j,env_list);
 			if(var.len)
-				var.token_word = put_data_token(&var.len, head->value,&i,env_list);
+				var.token_word = put_data_token(&var.len, head->value,&var.j,env_list);
 			put_word(&data,&var.token_word,env_list);
-			var.i = i;
+			var.i = var.j;
 			insert_dividers(&data,head->value,&var,env_list);
-			i = var.i;
-			i++;
+			var.j = var.i;
+			var.j++;
 		}
         head = head->next;
     }
