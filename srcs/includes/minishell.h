@@ -55,12 +55,15 @@ typedef		struct s_init{
 	int len;
 	int close;
 	int i;
+	int	end;
 	int	tmp;
 	int len_dollar;
 	int	redirection;
 	char *dollar;
 	char *token;
 	char *file_name;
+	int start;
+    t_list *head;
 }		t_init;
 
 typedef		struct s_redirection{

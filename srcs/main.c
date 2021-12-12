@@ -47,6 +47,7 @@ int main(int argc, char **argv, char **envp)
 		parsing(str,&error,env_list,&data);
 		if(!error)
 		{
+			env_list->exit_status = error;
 			while (data != NULL)
 			{
 				j = 0;
