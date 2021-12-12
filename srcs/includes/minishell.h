@@ -73,6 +73,8 @@ typedef		struct s_init{
 	int len_dollar;
 	int	redirection;
 	char *dollar;
+	char **filter;
+	char *vtmp;
 	char *token;
 	char *file_name;
 	int start;

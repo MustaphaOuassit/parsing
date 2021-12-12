@@ -336,92 +336,116 @@ int		len_args(char *value ,int *start)
 	return(len);
 }
 
+void	file_args_double(t_init *var,char *value,char **filter,int *tmp)
+{
+	*tmp = *tmp + 1;
+	while (value[*tmp])
+	{
+		if(value[*tmp] == '\"')
+		{
+			*tmp = *tmp + 1;
+			break;
+		}
+		filter[var->start][var->i] = value[*tmp];
+		var->i++;
+		*tmp = *tmp + 1;
+	}
+}
+
+void	file_args_single(t_init *var,char *value,char **filter,int *tmp)
+{
+	*tmp = *tmp + 1;
+	while (value[*tmp])
+	{
+		if(value[*tmp] == '\'')
+		{
+			*tmp = *tmp + 1;
+			break;
+		}
+		filter[var->start][var->i] = value[*tmp];
+		var->i++;
+		*tmp = *tmp + 1;
+	}
+}
+
+void	file_args_dollar(int *tmp,t_init *var, char *value, char **filter)
+{
+	if(value[*tmp] == '$' && delimiter_skip(value,tmp))
+		skip_value(value,tmp);
+	else
+	{
+		filter[var->start][var->i] = value[*tmp];
+		var->i++;
+	}
+	*tmp = *tmp + 1;
+}
+
+char *initial(t_init *var, t_envp *env_list, char **filter, char *value)
+{
+	var->i = len_args(value,&var->j);
+	filter[var->start] = (char *)malloc(sizeof(char) * (var->i + 1));
+	free_in_parcer(&env_list->allocation,filter[var->start],NULL);
+	filter[var->start][var->i] = '\0';
+	var->check = var->i;
+	var->i = 0;
+	return(filter[var->start]);
+}
+
+char **declar(int *len, int *j, int *tmp, t_envp *env_list)
+{
+	char **filter;
+
+	filter = (char **)malloc(sizeof(char *) * (*len + 1));
+	free_in_parcer(&env_list->allocation,NULL,filter);
+	filter[*len] = 0;
+	*j = 0;
+	*tmp = 0;
+	return(filter);
+}
+
+void	initialisation_args(t_init *var, char *value, t_envp *env_list)
+{
+	var->j = 0;
+	var->i = 0;
+	var->start = 0;
+	var->check = 0;
+	var->filter = NULL;
+	var->vtmp = ft_strdup(value);
+	free_in_parcer(&env_list->allocation,var->vtmp,NULL);
+	var->len = get_allocation(var->vtmp,env_list);
+}
+
+void	check_position(t_init *var, char *value, char **filter, int *tmp)
+{
+	if(value[*tmp] == '\"')
+		file_args_double(var,value,filter,tmp);
+	else if(value[*tmp] == '\'')
+		file_args_single(var,value,filter,tmp);
+	else if(value[*tmp] != ' ')
+		file_args_dollar(tmp,var,value,filter);
+	else
+		*tmp = *tmp + 1;
+}
+
 char  **filter_args(char *value,t_envp *env_list)
 {
-	int j;
-	int i;
-	int r;
-	int len;
-	char **filter;
-	int tmp;
-	char *vtmp;
-	int  p;
+	t_init var;
 
-	j = 0;
-	i = 0;
-	r = 0;
-	p = 0;
-	filter = NULL;
-	vtmp = ft_strdup(value);
-	free_in_parcer(&env_list->allocation,vtmp,NULL);
-	len = get_allocation(vtmp,env_list);
-	if(len)
+	initialisation_args(&var,value,env_list);
+	if(var.len)
 	{
-		filter = (char **)malloc(sizeof(char *) * (len + 1));
-		free_in_parcer(&env_list->allocation,NULL,filter);
-		filter[len] = 0;
-		j = 0;
-		tmp = 0;
-		while (j <= (int)ft_strlen(value))
+		var.filter = declar(&var.len,&var.j,&var.tmp,env_list);
+		while (var.j <= (int)ft_strlen(value))
 		{
-			i = len_args(value,&j);
-			filter[r] = (char *)malloc(sizeof(char) * (i + 1));
-			free_in_parcer(&env_list->allocation,filter[r],NULL);
-			filter[r][i] = '\0';
-			p = i;
-			i = 0;
-			while (i < p)
-			{
-				if(value[tmp] == '\"')
-				{
-					tmp++;
-					while (value[tmp])
-					{
-						if(value[tmp] == '\"')
-						{
-							tmp++;
-							break;
-						}
-						filter[r][i] = value[tmp];
-						i++;
-						tmp++;
-					}
-				}
-				else if(value[tmp] == '\'')
-				{
-					tmp++;
-					while (value[tmp])
-					{
-						if(value[tmp] == '\'')
-						{
-							tmp++;
-							break;
-						}
-						filter[r][i] = value[tmp];
-						i++;
-						tmp++;
-					}
-				}
-				else if(value[tmp] != ' ')
-				{
-					if(value[tmp] == '$' && delimiter_skip(value,&tmp))
-						skip_value(value,&tmp);
-					else
-					{
-						filter[r][i] = value[tmp];
-						i++;
-					}
-					tmp++;
-				}
-				else
-					tmp++;
-			}
-			r++;
-			j++;
+			var.filter[var.start] = initial(&var,env_list,var.filter,value);
+			while (var.i < var.check)
+				check_position(&var,value,var.filter,&var.tmp);
+			var.start++;
+			var.j++;
 		}
-		filter[len] = 0;
+		var.filter[var.len] = 0;
 	}
-	return(filter);
+	return(var.filter);
 }
 
 int	all_data(t_data	**head, t_init *var,t_envp *env_list)
