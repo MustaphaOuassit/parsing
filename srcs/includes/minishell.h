@@ -48,10 +48,22 @@ typedef		struct s_list{
 	struct s_list *next;
 }		t_list;
 
+typedef		struct s_args{
+	char	*arguments;
+	struct	s_args *next;
+}			t_args;
+
+typedef		struct s_redirection{
+	char	*file_name;
+	int		type;
+	struct s_redirection *next;
+}			t_redirection;
+
 typedef		struct s_init{
 	int type;
 	char *token_word;
 	char *value;
+	char **arguments;
 	int len;
 	int close;
 	int i;
@@ -64,14 +76,15 @@ typedef		struct s_init{
 	char *token;
 	char *file_name;
 	int start;
+	int check;
+	int	nb_heredoc;
+	int error;
+	int pipe;
+	t_args *args;
+	t_redirection *rdt;
     t_list *head;
 }		t_init;
 
-typedef		struct s_redirection{
-	char	*file_name;
-	int		type;
-	struct s_redirection *next;
-}			t_redirection;
 
 typedef		struct s_data{
 	char	**arguments;
@@ -80,10 +93,6 @@ typedef		struct s_data{
 	struct s_data *next;
 }		t_data;
 
-typedef		struct s_args{
-	char	*arguments;
-	struct	s_args *next;
-}			t_args;
 
 typedef		struct s_ambiguous{
 	char	*value;

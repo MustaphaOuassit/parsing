@@ -129,7 +129,6 @@ int	fill_data_ambiguous(t_ambiguous **head, char *value,t_envp *env_list)
 		*head = new_node;
 		return(0);
 	}
-
 	while (line->next != NULL)
 	{	
 		line = line->next;

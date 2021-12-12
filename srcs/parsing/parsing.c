@@ -198,6 +198,7 @@ int    middle_pipe(char *cmd, int *i)
              else
                 break;
         }
+        *i = *i - 1;
     }
     return(0);
 }

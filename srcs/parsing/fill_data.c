@@ -424,15 +424,15 @@ char  **filter_args(char *value,t_envp *env_list)
 	return(filter);
 }
 
-int	all_data(t_data	**head, t_redirection *rdt, char **arguments, t_envp *env_list)
+int	all_data(t_data	**head, t_init *var,t_envp *env_list)
 {
 	t_data *new_node = malloc(sizeof(t_data));
 	free_in_parcer(&env_list->allocation,new_node,NULL);
 	t_data *line;
 
 	line = *head;
-	new_node->arguments = arguments;
-	new_node->redirection = rdt;
+	new_node->arguments = var->arguments;
+	new_node->redirection = var->rdt;
 	new_node->nb_heredoc = env_list->nb_herdoc;
 	new_node->next = NULL;
 	if(*head == NULL)
@@ -587,7 +587,7 @@ int		is_couts(char *value)
 	return(0);
 }
 
-char	*skip_dollar(char *value, int *error,t_envp *env_list)
+char	*skip_dollar(char *value, t_init *var,t_envp *env_list)
 {
 	int i;
 	int	len;
@@ -641,7 +641,7 @@ char	*skip_dollar(char *value, int *error,t_envp *env_list)
 		{
 			if(value[i] == ' ')
 			{
-				*error = -1;
+				var->error = -1;
 				break;
 			}
 			file_name[len] = value[i];
@@ -792,7 +792,7 @@ char	*filter_value(char *value,t_envp *env_list)
 	return(file_name);
 }
 
-char	*filter_file_dollar(char *value, int *error, t_envp *env_list)
+char	*filter_file_dollar(char *value, t_init *var, t_envp *env_list)
 {
 	int	i;
 	char	*file_name;
@@ -801,142 +801,163 @@ char	*filter_file_dollar(char *value, int *error, t_envp *env_list)
 	i = 0;
 	check = is_couts(value);
 	if(check)
-		file_name = skip_dollar(value,error,env_list);
+		file_name = skip_dollar(value,var,env_list);
 	else
 	{
 		file_name = fill_file(value,env_list);
 		if(file_name[0] == '$')
-			*error = 1;
+			var->error = 1;
 		else if(is_space(file_name))
-			*error = -1;
+			var->error = -1;
 		else
-			file_name = skip_dollar(value,error,env_list);
+			file_name = skip_dollar(value,var,env_list);
 	}
 	return(file_name);
 }
 
+char	**put_data(t_init *var, t_envp *env_list)
+{
+	char **arguments;
+	int	t;
+	
+	arguments = NULL;
+	arguments = (char **)malloc(sizeof(char *) * (var->len + 1));
+	free_in_parcer(&env_list->allocation,NULL,arguments);
+	t = 0;
+	while (var->args != NULL)
+	{
+		arguments[t] = var->args->arguments;
+		t++;
+		var->args = var->args->next;
+	}
+	arguments[var->len] = 0;
+	env_list->nb_herdoc = var->nb_heredoc;
+	var->len = 0;
+	var->nb_heredoc = 0;
+	return(arguments);
+}
+
+int	redirection_value(t_tokens *tokens,t_envp *env_list,t_init *var)
+{
+	if(tokens->type == 5)
+		var->nb_heredoc = var->nb_heredoc + 1;
+	if(error_redirection(var->check, tokens,env_list))
+		return(1);
+	var->check = 1;
+	return(0);
+}
+
+char	*file_dollar(t_tokens *tokens, t_init *var, t_envp *env_list)
+{
+	if(var->type != 5)
+	{
+		tokens->value = filter_file_dollar(tokens->value,var,env_list);
+		if(var->error == 1)
+			var->type = 7;
+		if(var->error == -1)
+		{
+			var->type = 7;
+			tokens->value = ft_strdup(env_list->ambiguous->value);
+			free_in_parcer(&env_list->allocation,tokens->value,NULL);
+			env_list->ambiguous = env_list->ambiguous->next;
+		}
+	}
+	else
+		tokens->value = filter_value(tokens->value,env_list);
+	return(tokens->value);
+}
+
+int		error_value(t_init *var, char *value,t_envp *env_list)
+{
+	if(!ft_strcmp(value,"|"))
+	{
+		write(1,"minishell: syntax error near unexpected token `|'\n",50);
+			return(1);
+	}
+	redirection_token(&var->rdt,var->type,value,env_list);
+	return(0);
+}
+
+void	fill_filter(t_init *var, char *value, t_envp *env_list)
+{
+	int j;
+	char **filter;
+
+	j = 0;
+	filter = filter_args(value,env_list);
+	if(filter)
+	{
+		while (filter[j])
+		{
+			args_token(&var->args,filter[j],env_list);
+			var->len = var->len + 1;
+			j++;
+		}
+	}
+}
+
+void	initialisation_data(t_init *var)
+{
+	var->rdt = NULL;
+    var->args = NULL;
+	var->check = 0;
+	var->len = 0;
+	var->error = 0;
+	var->pipe = 0;
+	var->nb_heredoc = 0;
+	var->arguments = NULL;
+}
+
+int		file_error(t_init *var, t_tokens *tokens, t_envp *env_list)
+{
+	var->pipe = 0;
+	if( tokens->type <= 5 && tokens->type >= 2)
+	{
+		if(redirection_value(tokens,env_list,var))
+			return(1);
+		var->type = tokens->type;
+	}
+	else if(var->check == 1)
+	{
+		var->check = 0;
+		tokens->value = file_dollar(tokens,var, env_list);
+		if(error_value(var,tokens->value,env_list))
+			return(1);
+	}
+	else
+		fill_filter(var,tokens->value,env_list);
+	return (0);
+}
+
+void	prep_data(t_init *var, t_envp *env_list,t_data **data)
+{
+	var->arguments = put_data(var,env_list);
+	all_data(data,var,env_list);
+	var->rdt = NULL;
+	var->args = NULL;
+}
 
 int     fill_data(t_tokens *tokens, t_data **data,t_envp *env_list)
 {
-    t_redirection *rdt;
-    t_args *args;
-	int		check;
-	int		type;
-	int len;
-	int 	j;
-	int t;
-	char **filter;
-	char **arguments;
-	int		pipe;
-	int		nb_heredoc;
-	char	*tmp;
-	int		error;
+	t_init var;
 
-    rdt = NULL;
-    args = NULL;
-	filter = NULL;
-	arguments = NULL;
-	check = 0;
-	len = 0;
-	j = 0;
-	t = 0;
-	error = 0;
-	pipe = 0;
-	nb_heredoc = 0;
-	tmp = NULL;
+	initialisation_data(&var);
     while (tokens != NULL)
     {
-		if(tokens->type == 1 && check != 1)
+		if(tokens->type == 1 && var.check != 1)
 		{
-			pipe = 1;
-			arguments = (char **)malloc(sizeof(char *) * (len + 1));
-			free_in_parcer(&env_list->allocation,NULL,arguments);
-			t = 0;
-			while (args != NULL)
-			{
-				arguments[t] = args->arguments;
-				t++;
-				args = args->next;
-			}
-			arguments[len] = 0;
-			env_list->nb_herdoc = nb_heredoc;
-			all_data(data,rdt,arguments,env_list);
-			rdt = NULL;
-			len = 0;
-			nb_heredoc = 0;
+			var.pipe = 1;
+			prep_data(&var,env_list,data);
 			tokens = tokens->next;
 		}
 		else
 		{
-			pipe = 0;
-			if( tokens->type <= 5 && tokens->type >= 2)
-			{
-				if(tokens->type == 5)
-					nb_heredoc++;
-				if(error_redirection(check, tokens,env_list))
-					return(258);
-				check = 1;
-				type = tokens->type;
-			}
-			else if(check == 1)
-			{
-				check = 0;
-				if(type != 5)
-				{
-					tokens->value = filter_file_dollar(tokens->value,&error,env_list);
-					if(error == 1)
-						type = 7;
-					if(error == -1)
-					{
-						type = 7;
-						tokens->value = ft_strdup(env_list->ambiguous->value);
-						free_in_parcer(&env_list->allocation,tokens->value,NULL);
-						env_list->ambiguous = env_list->ambiguous->next;
-					}
-				}
-				else
-					tokens->value = filter_value(tokens->value,env_list);
-				if(!ft_strcmp(tokens->value,"|"))
-				{
-					write(1,"minishell: syntax error near unexpected token `|'\n",50);
-					return(258);
-				}
-				redirection_token(&rdt,type,tokens->value,env_list);
-			}
-			else
-			{
-				filter = filter_args(tokens->value,env_list);
-				if(filter)
-				{
-					j = 0;
-					while (filter[j])
-					{
-						args_token(&args,filter[j],env_list);
-						len++;
-						j++;
-					}
-				}
-			}
+			if (file_error(&var,tokens,env_list))
+				return (258);
         	tokens = tokens->next;
 		}
     }
-	if(pipe == 0)
-	{
-			arguments = (char **)malloc(sizeof(char *) * (len + 1));
-			free_in_parcer(&env_list->allocation,NULL,arguments);
-			t = 0;
-			while (args != NULL)
-			{
-				arguments[t] = args->arguments;
-				t++;
-				args = args->next;
-			}
-			arguments[len] = 0;
-			env_list->nb_herdoc = nb_heredoc;
-			all_data(data,rdt,arguments,env_list);
-			rdt = NULL;
-			len = 0;
-			nb_heredoc = 0;
-	}
+	if(var.pipe == 0)
+		prep_data(&var,env_list,data);
     return(0);
 }
