@@ -75,12 +75,15 @@ typedef		struct s_init{
 	char *dollar;
 	char **filter;
 	char *vtmp;
+	char *check_error;
 	char *token;
 	char *file_name;
 	int start;
 	int check;
 	int	nb_heredoc;
 	int error;
+	char **split;
+	int nb;
 	int pipe;
 	t_args *args;
 	t_redirection *rdt;

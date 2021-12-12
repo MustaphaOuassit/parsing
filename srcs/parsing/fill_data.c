@@ -58,37 +58,40 @@ int	args_token(t_args	**head, char *args, t_envp *env_list)
     return(0);  
 }
 
+void	initialisation_convert(t_init *var, char *value, t_envp *env_list)
+{
+	var->i = 0;
+	var->j = 0;
+	var->check_error = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 3));
+	free_in_parcer(&env_list->allocation,var->check_error,NULL);
+	var->check_error[(int)ft_strlen(value) + 2] = '\0';
+}
+
 char	*convert(char *value,t_envp *env_list)
 {
-	char *error;
-	int i;
-	int j;
+	t_init var;
 
-	i = 0;
-	j = 0;
-	error = (char *)malloc(sizeof(char) * ((int)ft_strlen(value) + 3));
-	free_in_parcer(&env_list->allocation,error,NULL);
-	error[(int)ft_strlen(value) + 2] = '\0';
-	while (i < (int)ft_strlen(value) + 2)
+	initialisation_convert(&var,value,env_list);
+	while (var.i < (int)ft_strlen(value) + 2)
 	{
-		if(i == 0)
+		if(var.i == 0)
 		{
-			error[i] = '`';
-			i++;
+			var.check_error[var.i] = '`';
+			var.i++;
 		}
-		else if(i == (int)ft_strlen(value) + 1)
+		else if(var.i == (int)ft_strlen(value) + 1)
 		{
-			error[i] = '\'';
-			i++;
+			var.check_error[var.i] = '\'';
+			var.i++;
 		}
 		else
 		{
-			error[i] = value[j];
-			j++;
-			i++;
+			var.check_error[var.i] = value[var.j];
+			var.j++;
+			var.i++;
 		}
 	}
-	return(error);
+	return(var.check_error);
 }
 
 void	print_error_rdt(char *value,t_envp *env_list)
@@ -136,6 +139,21 @@ int		get_len_double(char *value)
 	return(len / 2);
 }
 
+void	add_check_couts(int *l, int *i, char *value, int ele)
+{
+	*l = *l + 1;
+	*i = *i + 1;
+	while (value[*i])
+	{
+		if(value[*i] == ele)
+		{
+			*l = *l + 1;
+			break;
+		}
+		*i = *i + 1;
+	}
+}
+
 int		len_couts(char *value)
 {
 	int i;
@@ -143,43 +161,16 @@ int		len_couts(char *value)
 
 	i = 0;
 	l = 0;
-
 	while (value[i])
 	{
 		if(value[i] == '\"')
-		{
-			l++;
-			i++;
-			while (value[i])
-			{
-				if(value[i] == '\"')
-				{
-					l++;
-					break;
-				}
-				i++;
-			}
-		}
+			add_check_couts(&l,&i,value,'\"');
 		if(value[i] == '\'')
-		{
-			l++;
-			i++;
-			while (value[i])
-			{
-				if(value[i] == '\'')
-				{
-					l++;
-					break;
-				}
-				i++;
-			}
-		}
+			add_check_couts(&l,&i,value,'\'');
 		i++;
 	}
 	return(l / 2);
 }
-
-
 
 int	end_dollar(char *value, int *start)
 {
@@ -207,133 +198,130 @@ void	skip_value(char *value, int *start)
 	*start = *start - 1;
 }
 
-int		get_allocation(char *value,t_envp *env_list)
+void	fill_space(char *value, int *i, int *len, int ele)
 {
-	int i;
-	int len;
-	char **split;
-	int		nb;
-
-	i = 0;
-	nb = 0;
-	split = NULL;
-	len = len_couts(value);
-	while (value[i])
+	value[*i] = ' ';
+		*i = *i + 1;
+	while (value[*i])
 	{
-		if(value[i] != '\"' && value[i] != '\'' && value[i] != ' ' && value[i + 1] == '\"' && value[i + 1] == '\'')
+		if(value[*i] == ele)
 		{
-			nb++;
-			len--;
+			if(value[*i + 1] != ' ')
+				*len = *len - 1;
+			value[*i] = ' ';
+			break;
 		}
-		else if(value[i] == ' ' && ((value[i + 1] == '\"') ||  (value[i + 1] == '\'')))
-			len++;
-		if(value[i] == '\"')
-		{
-			value[i] = ' ';
-			i++;
-			while (value[i])
-			{
-				if(value[i] == '\"')
-				{
-					if(value[i + 1] != ' ')
-						len--;
-					value[i] = ' ';
-					break;
-				}
-				value[i] = ' ';
-				i++;
-			}
-		}
-		else if(value[i] == '\'')
-		{
-			value[i] = ' ';
-			i++;
-			while (value[i])
-			{
-				if(value[i] == '\'')
-				{
-					if(value[i + 1] != ' ')
-						len--;
-					value[i] = ' ';
-					break;
-				}
-				value[i] = ' ';
-				i++;
-			}
-		}
-		else if(value[i] == '$' && delimiter_skip(value,&i))
-		{
-			nb++;
-			skip_value(value,&i);
-		}
-		i++;
+		value[*i] = ' ';
+		*i = *i + 1;
 	}
+}
 
+char	**check_len_values(char *value,int *len, int nb, t_envp *env_list)
+{
+	char **split;
+	int i;
+
+	i  = 0;
 	split = ft_split(value,' ');
 	free_in_parcer(&env_list->allocation,NULL,split);
-	i  = 0;
 	while (split[i])
 		i++;
 	if(nb)
 		i = i - nb;
-	if(len <= 0)
-		len = 0;
-	len = len + i;
-	if(len == 0)
-		len = 1;
-	return(len);
+	if(*len <= 0)
+		*len = 0;
+	*len = *len + i;
+	if(*len == 0)
+		*len = 1;
+	return (split);
+}
+
+void	initialisation_get(t_init *var, char *value)
+{
+	var->i = 0;
+	var->nb = 0;
+	var->split = NULL;
+	var->len = len_couts(value);
+}
+
+void	skip_dlm(int *nb, int *len)
+{
+	*nb = *nb + 1;
+	*len = *len - 1;
+}
+
+int		get_allocation(char *value,t_envp *env_list)
+{
+	t_init var;
+
+	initialisation_get(&var,value);
+	while (value[var.i])
+	{
+		if(value[var.i] != '\"' && value[var.i] != '\'' && value[var.i] != ' '
+		&& value[var.i + 1] == '\"' && value[var.i + 1] == '\'')
+			skip_dlm(&var.nb,&var.len);
+		else if(value[var.i] == ' ' && ((value[var.i + 1] == '\"') ||  (value[var.i + 1] == '\'')))
+			var.len++;
+		if(value[var.i] == '\"')
+			fill_space(value,&var.i,&var.len,'\"');
+		else if(value[var.i] == '\'')
+			fill_space(value,&var.i,&var.len,'\'');
+		else if(value[var.i] == '$' && delimiter_skip(value,&var.i))
+		{
+			var.nb++;
+			skip_value(value,&var.i);
+		}
+		var.i++;
+	}
+	var.split = check_len_values(value,&var.len,var.nb,env_list);
+	return(var.len);
+}
+
+void	fill_dollar_args(char *value, int *start, t_init *var)
+{
+	if(value[*start] == '$' && delimiter_skip(value,start))
+		skip_value(value,start);
+	else
+	{
+		var->check = 1;
+		var->len++;
+	}
+}
+
+void	file_len_args(int *start,char *value, int *len, int ele)
+{
+	*start = *start + 1;
+	while (value[*start])
+	{
+		if(value[*start] == ele)
+			break;
+		*len = *len + 1;
+		*start = *start + 1;
+	}
 }
 
 int		len_args(char *value ,int *start)
 {
-	int len;
-	int check;
+	t_init var;
 
-	len = 0;
-	check = 0;
+	var.len = 0;
+	var.check = 0;
 	while (value[*start])
 	{
 		if(value[*start] == '\"')
-		{
-			*start = *start + 1;
-			while (value[*start])
-			{
-				if(value[*start] == '\"')
-					break;
-				len++;
-				*start = *start + 1;
-			}
-		}
+			file_len_args(start,value,&var.len,'\"');
 		else if(value[*start] == '\'')
-		{
-			*start = *start + 1;
-			while (value[*start])
-			{
-				if(value[*start] == '\'')
-					break;
-				len++;
-				*start = *start + 1;
-			}
-			
-		}
+			file_len_args(start,value,&var.len,'\'');
 		else if(value[*start] != ' ')
 		{
 			if(value[*start] != '\"')
-			{
-				if(value[*start] == '$' && delimiter_skip(value,start))
-					skip_value(value,start);
-				else
-				{
-					check = 1;
-					len++;
-				}
-			}
+				fill_dollar_args(value,start,&var);
 		}
-		else if(value[*start] == ' ' && check == 1)
+		else if(value[*start] == ' ' && var.check == 1)
 			break;
 		*start = *start + 1;
 	}
-	return(len);
+	return(var.len);
 }
 
 void	file_args_double(t_init *var,char *value,char **filter,int *tmp)
