@@ -472,6 +472,30 @@ int		len_file_name(char *value)
 	return(len);
 }
 
+void	skip_content_value(char *value, int *i, int *len, int ele)
+{
+	*i = *i + 1;
+	while (value[*i])
+	{
+		if(value[*i] == ele)
+			break;
+		*i = *i + 1;
+		*len = *len + 1;
+	}
+}
+
+void	dollar_handler(char *value, int *i, int *check,int *len)
+{
+	if(value[*i] == '$')
+		*check = 1;
+	if(value[*i] == '?' && *check == 1)
+	{
+		*len = *len - 1;
+		*check = 0;
+	}
+	*len = *len + 1;
+}
+
 int		get_len_word(char *value)
 {
 	int i;
@@ -484,42 +508,24 @@ int		get_len_word(char *value)
 	while (value[i])
 	{
 		 if(value[i] == '\"')
-		{
-			i++;
-			while (value[i])
-			{
-				if (value[i] == '\"')
-					break;
-				len++;
-				i++;
-			}
-			
-		}
+			skip_content_value(value,&i,&len,'\"');
 		else if(value[i] == '\'')
-		{
-			i++;
-			while (value[i])
-			{
-				if (value[i] == '\'')
-					break;
-				len++;
-				i++;
-			}
-		}
+			skip_content_value(value,&i,&len,'\'');
 		else if(value[i] != '\'' && value[i] != '\"')
-		{
-			if(value[i] == '$')
-				check = 1;
-			if(value[i] == '?' && check == 1)
-			{
-				len--;
-				check = 0;
-			}
-			len++;
-		}
+			dollar_handler(value,&i,&check,&len);
 		i++;
 	}
 	return(len);
+}
+
+void	check_point(char *value, int *i)
+{
+	while (value[*i])
+	{
+		if(value[*i] == '?')
+			break;
+		*i = *i + 1;
+	}
 }
 
 int		get_len(char *value)
@@ -534,44 +540,18 @@ int		get_len(char *value)
 	while (value[i])
 	{
 		if(value[i] == '\"')
-		{
-			i++;
-			while (value[i])
-			{
-				if(value[i] == '\"')
-					break;
-				i++;
-				len++;
-			}
-			
-		}
+			skip_content_value(value,&i,&len,'\"');
 		else if(value[i] == '\'')
-		{
-			i++;
-			while (value[i])
-			{
-				if(value[i] == '\'')
-					break;
-				i++;
-				len++;
-			}
-			
-		}
+			skip_content_value(value,&i,&len,'\'');
 		else if(value[i] == '$' && delimiter(value, &i))
-		{
-			while (value[i])
-			{
-				if(value[i] == '?')
-					break;
-				i++;
-			}
-		}
+			check_point(value,&i);
 		else
 			len++;
 		i++;
 	}
 	return(len);
 }
+
 
 int		is_couts(char *value)
 {
@@ -587,110 +567,96 @@ int		is_couts(char *value)
 	return(0);
 }
 
+void	file_skip(char *value, int *i)
+{
+	while (value[*i])
+	{
+		if(value[*i] == '?')
+			break;
+		*i = *i + 1;
+	}
+}
+
+void	initialisation_values(t_init *vr, char *value, t_envp *env_list)
+{
+	vr->i = 0;
+	vr->len = get_len(value);
+	vr->tmp = vr->len;
+	vr->file_name = (char *)malloc(sizeof(char) * (vr->len + 1));
+	free_in_parcer(&env_list->allocation,vr->file_name,NULL);
+	vr->file_name[vr->len] = 0;
+	vr->len = 0;
+}
+
 char	*skip_dollar(char *value, t_init *var,t_envp *env_list)
 {
-	int i;
-	int	len;
-	int  tmp;
-	char	*file_name;
+	t_init vr;
 
-	i = 0;
-	len = get_len(value);
-	tmp = len;
-	file_name = (char *)malloc(sizeof(char) * (len + 1));
-	free_in_parcer(&env_list->allocation,file_name,NULL);
-	file_name[len] = 0;
-	len = 0;
-	while (len < tmp)
+	initialisation_values(&vr,value,env_list);
+	while (vr.len < vr.tmp)
 	{
-		if(value[i] == '\"')
-		{
-			i++;
-			while (value[i])
-			{
-				if(value[i] == '\"')
-					break;
-				file_name[len] = value[i];
-				i++;
-				len++;
-			}
-			
-		}
-		else if(value[i] == '\'')
-		{
-			i++;
-			while (value[i])
-			{
-				if(value[i] == '\'')
-					break;
-				file_name[len] = value[i];
-				i++;
-				len++;
-			}
-		}
-		else if(value[i] == '$' && delimiter(value, &i))
-		{
-			while (value[i])
-			{
-				if(value[i] == '?')
-					break;
-				i++;
-			}
-		}
+		if(value[vr.i] == '\"')
+			file_double(value,&vr.i,&vr.len,vr.file_name);
+		else if(value[vr.i] == '\'')
+			file_single(value,&vr.i,&vr.len,vr.file_name);
+		else if(value[vr.i] == '$' && delimiter(value, &vr.i))
+			file_skip(value,&vr.i);
 		else
 		{
-			if(value[i] == ' ')
+			if(value[vr.i] == ' ')
 			{
 				var->error = -1;
 				break;
 			}
-			file_name[len] = value[i];
-			len++;
+			vr.file_name[vr.len] = value[vr.i];
+			vr.len++;
 		}
-		i++;
+		vr.i++;
 	}
-	return(file_name);
+	return(vr.file_name);
+}
+
+void	initialisation_file(t_init *var, char *value, t_envp *env_list)
+{
+	var->i = 0;
+	var->check = 0;
+	var->len = len_file_name(value);
+	var->tmp = var->len;
+	var->file_name = (char *)malloc(sizeof(char) * (var->len + 1));
+	free_in_parcer(&env_list->allocation,var->file_name,NULL);
+	var->file_name[var->len] = '\0';
+	var->len = 0;
 }
 
 char	*fill_file(char *value, t_envp *env_list)
 {
-	int i;
-	int		len;
-	char	*file_name;
-	int		check;
-	int     tmp;
+	t_init var;
 
-	i = 0;
-	check = 0;
-	len = len_file_name(value);
-	tmp = len;
-	file_name = (char *)malloc(sizeof(char) * (len + 1));
-	free_in_parcer(&env_list->allocation,file_name,NULL);
-	file_name[len] = '\0';
-	len = 0;
-	while (len < tmp)
+	initialisation_file(&var,value,env_list);
+	while (var.len < var.tmp)
 	{
-		if(value[i] == '$' && delimiter(value,&i))
+		if(value[var.i] == '$' && delimiter(value,&var.i))
 		{
-			file_name[len] = value[i];
-			i++;
-			len++;
-			check = 1;
+			var.file_name[var.len] = value[var.i];
+			var.i++;
+			var.len++;
+			var.check = 1;
 		}
-		if(value[i] == '?' && check == 1)
+		if(value[var.i] == '?' && var.check == 1)
 		{
-			i++;
-			check = 0;
+			var.i++;
+			var.check = 0;
 		}
 		else
 		{
-			file_name[len] = value[i];
-			i++;
-			len++;
+			var.file_name[var.len] = value[var.i];
+			var.i++;
+			var.len++;
 		}
 	}
-	return(file_name);
+	return(var.file_name);
 }
+
 
 int		len_herdoc(char *value)
 {
@@ -704,28 +670,9 @@ int		len_herdoc(char *value)
 	while (value[i])
 	{
 		if(value[i] == '\"')
-		{
-			i++;
-			while (value[i])
-			{
-				if(value[i] == '\"')
-					break;
-				i++;
-				len++;
-			}
-			
-		}
+			skip_content_value(value, &i, &len,'\"');
 		else if(value[i] == '\'')
-		{
-			i++;
-			while (value[i])
-			{
-				if(value[i] == '\'')
-					break;
-				i++;
-				len++;
-			}
-		}
+			skip_content_value(value, &i, &len,'\'');
 		else
 			len++;
 		i++;
@@ -733,55 +680,56 @@ int		len_herdoc(char *value)
 	return(len);
 }
 
+void	file_double(char *value, int *i, int *len, char *file_name)
+{
+	*i = *i + 1;
+	while (value[*i])
+	{
+		if(value[*i] == '\"')
+			break;
+		file_name[*len] = value[*i];
+		*i = *i + 1;
+		*len = *len + 1;
+	}
+}
+
+void	file_single(char *value, int *i, int *len, char *file_name)
+{
+	*i = *i + 1;
+	while (value[*i])
+	{
+		if(value[*i] == '\'')
+			break;
+		file_name[*len] = value[*i];
+		*i = *i + 1;
+		*len = *len + 1;
+	}
+}			
 char	*fill_herdoc(char *value,t_envp *env_list)
 {
-	int i;
-	int	len;
-	char	*file_name;
-	int tmp;
+	t_init var;
 
-	i = 0;
-	len = len_herdoc(value);
-	tmp = len;
-	file_name = (char *)malloc(sizeof(char) * (len + 1));
-	free_in_parcer(&env_list->allocation,file_name,NULL);
-	file_name[len] = 0;
-	len = 0;
-	while (len < tmp)
+	var.i = 0;
+	var.len = len_herdoc(value);
+	var.tmp = var.len;
+	var.file_name = (char *)malloc(sizeof(char) * (var.len + 1));
+	free_in_parcer(&env_list->allocation,var.file_name,NULL);
+	var.file_name[var.len] = 0;
+	var.len = 0;
+	while (var.len < var.tmp)
 	{
-		if(value[i] == '\"')
-		{
-			i++;
-			while (value[i])
-			{
-				if(value[i] == '\"')
-					break;
-				file_name[len] = value[i];
-				i++;
-				len++;
-			}
-			
-		}
-		else if(value[i] == '\'')
-		{
-			i++;
-			while (value[i])
-			{
-				if(value[i] == '\'')
-					break;
-				file_name[len] = value[i];
-				i++;
-				len++;
-			}
-		}
+		if(value[var.i] == '\"')
+			file_double(value, &var.i, &var.len, var.file_name);
+		else if(value[var.i] == '\'')
+			file_single(value, &var.i, &var.len, var.file_name);
 		else
 		{
-			file_name[len] = value[i];
-			len++;
+			var.file_name[var.len] = value[var.i];
+			var.len++;
 		}
-		i++;
+		var.i++;
 	}
-	return(file_name);
+	return(var.file_name);
 }
 
 char	*filter_value(char *value,t_envp *env_list)

@@ -159,6 +159,9 @@ int		delimiter_skip(char *value, int *start);
 int		is_space(char *value);
 int		free_in_parcer(t_free **head, void *value, char	**table);
 void	free_two(char **table);
+void	file_double(char *value, int *i, int *len, char *file_name);
+void	file_single(char *value, int *i, int *len, char *file_name);
+void	skip_content_value(char *value, int *i, int *len, int ele);
 
 
 
