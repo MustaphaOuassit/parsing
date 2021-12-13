@@ -129,33 +129,52 @@ void	fill_data_dollar(char *value, int *i, char *data,t_envp *env_list)
 	var.j = 0;
 	var.dollar = get_dollar_value(value,i);
 	env = ft_strdup(get_env_hrd(var.dollar,env_list));
-	while (data[var.i])
+	while (env[var.j])
 	{
 		data[var.i] = env[var.j];
 		var.i++;
 		var.j++;
 	}
-	printf("data : %s\n",data);
+
 }
 
 char	*expand_value(char *value, t_envp *env_list)
 {
 	t_init var;
+	char *exp;
+	char *env;
 
 	var.i = 0;
+	var.j = 0;
+	var.tmp = 0;
+	exp = NULL;
 	var.len = len_expand(value, env_list);
 	var.dollar = (char *)malloc(sizeof(char) * (var.len + 1));
 	var.dollar[var.len] = '\0';
-	while (var.i < var.len)
+
+	while (var.tmp < var.len)
 	{
 		if(value[var.i] == '$' && check_dlm(value[var.i + 1]))
-			fill_data_dollar(value,&var.i,var.dollar,env_list);
+		{
+			exp = get_dollar_value(value,&var.i);
+			env = ft_strdup(get_env_hrd(exp,env_list));
+			var.j = 0;
+			while (env[var.j])
+			{
+				var.dollar[var.tmp] = env[var.j];
+				var.j++;
+				var.tmp++;
+			}
+			var.i--;
+		}
 		else
 		{
-			var.dollar[var.i] = value[var.i];
-			var.i++;
+			var.dollar[var.tmp] = value[var.i];
+			var.tmp++;
 		}
+		var.i++;
 	}
+	
 	return(var.dollar);
 }
 
