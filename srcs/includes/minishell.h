@@ -153,6 +153,7 @@ void	ft_exit();
 	< : 4;
 	<< : 5;
 	word : 6;
+	<< expand : 8
 */
 
 int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data);
@@ -167,7 +168,8 @@ void	free_two(char **table);
 void	file_double(char *value, int *i, int *len, char *file_name);
 void	file_single(char *value, int *i, int *len, char *file_name);
 void	skip_content_value(char *value, int *i, int *len, int ele);
-
+char	*expand_value(char *value, t_envp *env_list);
+char	*fill_dollar_one(char *value,t_envp *env_list);
 
 
 

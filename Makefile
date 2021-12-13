@@ -33,7 +33,7 @@ all : $(NAME)
 
 $(NAME):
 	@make -s -C ./libraries/libft
-	@gcc -Wall -Werror -Wextra -lreadline -fsanitize=address -g  -I .  $(SRC) $(LIBFT) -D BUFFER_SIZE=1 -o $(NAME)
+	@gcc -lreadline -fsanitize=address -g  -I .  $(SRC) $(LIBFT) -D BUFFER_SIZE=1 -o $(NAME)
 
 
 clean:

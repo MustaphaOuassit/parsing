@@ -13,6 +13,152 @@
 
 # include "../includes/minishell.h"
 
+int	check_dlm(int c)
+{
+	if(c != '\'' && c != '\"' && c != ' ' && c != '$'
+		&& c != '|' && c != '<' && c != '>' && c != '\0')
+		return(1);
+	return(0);
+}
+
+int	allocation_expand(char *value, int *i)
+{
+	int len;
+
+	len = 0;
+	*i = *i + 1;
+	if(value[*i] == '?')
+	{
+		*i = *i + 1;
+		return (1);
+	}
+	while(value[*i])
+	{
+		if(value[*i] == '\'' || value[*i] == '\"' || value[*i] == ' ' 
+			|| value[*i] == '$' || value[*i] == '|' || value[*i] == '<' 
+			|| value[*i] == '>' || value[*i] == '\0')
+			break;
+		*i = *i + 1;
+		len++;
+	}
+	return(len);
+}
+
+char	*get_env_hrd(char *value, t_envp *env_list)
+{
+	t_envp	*tmp;
+
+	tmp = env_list;
+	if(value[0] == '?')
+		return(ft_itoa(env_list->exit_status));
+	while (tmp != NULL)
+	{
+		if(!ft_strcmp(tmp->key,value))
+			return(tmp->value);
+		tmp = tmp->next;
+	}
+	tmp = NULL;
+	return("\0");
+}
+
+void	get_dollar_expand(char *value, t_init *var,t_envp *env_list)
+{
+	t_init vr;
+	char *dollar;
+
+	vr.tmp = var->i;
+	vr.i = 0;
+	vr.len = allocation_expand(value,&var->i);
+	dollar = (char *)malloc(sizeof(char) * (vr.len + 1));
+	dollar[vr.len] = '\0';
+	vr.tmp++;
+	while (vr.i < vr.len)
+	{
+		dollar[vr.i] = value[vr.tmp];
+		vr.tmp++;
+		vr.i++;
+	}
+	var->len = var->len + (int)ft_strlen(get_env_hrd(dollar,env_list));
+}
+
+int len_expand(char *value, t_envp *env_list)
+{
+	t_init var;
+
+	var.len = 0;
+	var.i = 0;
+	while (value[var.i])
+	{
+		if(value[var.i] == '$' && check_dlm(value[var.i + 1]))
+			get_dollar_expand(value,&var, env_list);
+		else
+		{
+			var.len++;
+			var.i++;
+		}
+	}
+	return(var.len);
+}
+
+char *get_dollar_value(char *value, int *i)
+{
+	t_init vr;
+	char *dollar;
+
+	vr.tmp = *i;
+	vr.i = 0;
+	vr.len = allocation_expand(value,i);
+	dollar = (char *)malloc(sizeof(char) * (vr.len + 1));
+	dollar[vr.len] = '\0';
+	vr.tmp++;
+	while (vr.i < vr.len)
+	{
+		dollar[vr.i] = value[vr.tmp];
+		vr.tmp++;
+		vr.i++;
+	}
+	return(dollar);
+}
+
+void	fill_data_dollar(char *value, int *i, char *data,t_envp *env_list)
+{
+	t_init var;
+	char *env;
+
+	var.i = *i;
+	var.j = 0;
+	var.dollar = get_dollar_value(value,i);
+	env = ft_strdup(get_env_hrd(var.dollar,env_list));
+	while (data[var.i])
+	{
+		data[var.i] = env[var.j];
+		var.i++;
+		var.j++;
+	}
+	printf("data : %s\n",data);
+}
+
+char	*expand_value(char *value, t_envp *env_list)
+{
+	t_init var;
+
+	var.i = 0;
+	var.len = len_expand(value, env_list);
+	var.dollar = (char *)malloc(sizeof(char) * (var.len + 1));
+	var.dollar[var.len] = '\0';
+	while (var.i < var.len)
+	{
+		if(value[var.i] == '$' && check_dlm(value[var.i + 1]))
+			fill_data_dollar(value,&var.i,var.dollar,env_list);
+		else
+		{
+			var.dollar[var.i] = value[var.i];
+			var.i++;
+		}
+	}
+	return(var.dollar);
+}
+
 int	redirection_token(t_redirection	**head,int type, char *file_name, t_envp *env_list)
 {
 	t_redirection *new_node = malloc(sizeof(t_redirection));
@@ -564,7 +710,6 @@ int		get_len(char *value)
 	return(len);
 }
 
-
 int		is_couts(char *value)
 {
 	int i;
@@ -573,6 +718,20 @@ int		is_couts(char *value)
 	while (value[i])
 	{
 		if(value[i] == '\'' || value[i] == '\"' || (value[i] == '$' && !(delimiter(value,&i)) ))
+			return(1);
+		i++;
+	}
+	return(0);
+}
+
+int		is_couts_hrd(char *value)
+{
+	int i;
+
+	i = 0;
+	while (value[i])
+	{
+		if(value[i] == '\'' || value[i] == '\"')
 			return(1);
 		i++;
 	}
@@ -823,7 +982,11 @@ char	*file_dollar(t_tokens *tokens, t_init *var, t_envp *env_list)
 		}
 	}
 	else
+	{
+		if(!is_couts_hrd(tokens->value))
+			var->type = 8;
 		tokens->value = filter_value(tokens->value,env_list);
+	}
 	return(tokens->value);
 }
 

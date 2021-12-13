@@ -22,6 +22,7 @@ int main(int argc, char **argv, char **envp)
 	int j;
 	int	len;
 	int error;
+	char *ptr;
 
 	i = 0;
 	j = 0;
@@ -44,6 +45,8 @@ int main(int argc, char **argv, char **envp)
 		str = readline("-> minishell ");
 		add_history(str);
 		data = NULL;
+		ptr = expand_value(str,env_list);
+		printf("%s\n",ptr);
 		parsing(str,&error,env_list,&data);
 		if(!error)
 		{
