@@ -70,6 +70,7 @@ void	get_dollar_expand(char *value, t_init *var,t_envp *env_list)
 	vr.i = 0;
 	vr.len = allocation_expand(value,&var->i);
 	dollar = (char *)malloc(sizeof(char) * (vr.len + 1));
+	free_in_parcer(&env_list->allocation,dollar,NULL);
 	dollar[vr.len] = '\0';
 	vr.tmp++;
 	while (vr.i < vr.len)
@@ -100,7 +101,7 @@ int len_expand(char *value, t_envp *env_list)
 	return(var.len);
 }
 
-char *get_dollar_value(char *value, int *i)
+char *get_dollar_value(char *value, int *i, t_envp *env_list)
 {
 	t_init vr;
 	char *dollar;
@@ -109,6 +110,7 @@ char *get_dollar_value(char *value, int *i)
 	vr.i = 0;
 	vr.len = allocation_expand(value,i);
 	dollar = (char *)malloc(sizeof(char) * (vr.len + 1));
+	free_in_parcer(&env_list->allocation,dollar,NULL);
 	dollar[vr.len] = '\0';
 	vr.tmp++;
 	while (vr.i < vr.len)
@@ -127,8 +129,9 @@ void	fill_data_dollar(char *value, int *i, char *data,t_envp *env_list)
 
 	var.i = *i;
 	var.j = 0;
-	var.dollar = get_dollar_value(value,i);
+	var.dollar = get_dollar_value(value,i,env_list);
 	env = ft_strdup(get_env_hrd(var.dollar,env_list));
+	free_in_parcer(&env_list->allocation,env,NULL);
 	while (env[var.j])
 	{
 		data[var.i] = env[var.j];
@@ -138,43 +141,50 @@ void	fill_data_dollar(char *value, int *i, char *data,t_envp *env_list)
 
 }
 
+void	initialisation_expand(t_init *var, char *value, t_envp *env_list)
+{
+	var->i = 0;
+	var->j = 0;
+	var->tmp = 0;
+	var->exp = NULL;
+	var->len = len_expand(value, env_list);
+	var->dollar = (char *)malloc(sizeof(char) * (var->len + 1));
+	free_in_parcer(&env_list->allocation,var->dollar,NULL);
+	var->dollar[var->len] = '\0';
+	var->env = NULL;
+}
+
+void	fill_expand(char *dollar, char *value, int *tmp, int i)
+{
+	dollar[*tmp] = value[i];
+	*tmp = *tmp + 1;
+}
+
 char	*expand_value(char *value, t_envp *env_list)
 {
 	t_init var;
-	char *exp;
-	char *env;
 
-	var.i = 0;
-	var.j = 0;
-	var.tmp = 0;
-	exp = NULL;
-	var.len = len_expand(value, env_list);
-	var.dollar = (char *)malloc(sizeof(char) * (var.len + 1));
-	var.dollar[var.len] = '\0';
-
+	initialisation_expand(&var,value,env_list);
 	while (var.tmp < var.len)
 	{
 		if(value[var.i] == '$' && check_dlm(value[var.i + 1]))
 		{
-			exp = get_dollar_value(value,&var.i);
-			env = ft_strdup(get_env_hrd(exp,env_list));
+			var.exp = get_dollar_value(value,&var.i,env_list);
+			var.env = ft_strdup(get_env_hrd(var.exp,env_list));
+			free_in_parcer(&env_list->allocation,var.env,NULL);
 			var.j = 0;
-			while (env[var.j])
+			while (var.env[var.j])
 			{
-				var.dollar[var.tmp] = env[var.j];
+				var.dollar[var.tmp] = var.env[var.j];
 				var.j++;
 				var.tmp++;
 			}
 			var.i--;
 		}
 		else
-		{
-			var.dollar[var.tmp] = value[var.i];
-			var.tmp++;
-		}
+			fill_expand(var.dollar,value,&var.tmp,var.i);
 		var.i++;
 	}
-	
 	return(var.dollar);
 }
 

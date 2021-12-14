@@ -85,6 +85,8 @@ typedef		struct s_init{
 	char **split;
 	int nb;
 	int pipe;
+	char *exp;
+	char *env;
 	t_args *args;
 	t_redirection *rdt;
     t_list *head;
@@ -154,6 +156,7 @@ void	ft_exit();
 	<< : 5;
 	word : 6;
 	<< expand : 8
+	function expand : expand_value();
 */
 
 int    parsing(char *cmd, int *error,t_envp *env_list, t_data **data);
