@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 03:08:42 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/16 21:50:09 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 00:12:34 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -76,6 +76,9 @@ int	file_error(t_init *var, t_tokens *tokens, t_envp *env_list)
 
 void	prep_data(t_init *var, t_envp *env_list, t_data **data)
 {
+	int i;
+
+	i = 0;
 	var->arguments = put_data(var, env_list);
 	all_data(data, var, env_list);
 	var->rdt = NULL;

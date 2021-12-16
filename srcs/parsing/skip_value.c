@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 02:57:28 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/16 21:53:52 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 00:34:42 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,10 +50,12 @@ char	**check_len_values(char *value, int *len, int nb, t_envp *env_list)
 	int		i;
 
 	i = 0;
+	if(i == 1)
+		env_list = NULL;
 	split = ft_split(value, ' ');
-	free_in_parcer(&env_list->allocation, NULL, split);
 	while (split[i])
 		i++;
+	free_two(split);
 	if (nb)
 		i = i - nb;
 	if (*len <= 0)
