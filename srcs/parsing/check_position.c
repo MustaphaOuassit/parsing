@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 03:00:47 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/14 04:37:35 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/16 21:51:10 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,7 +51,6 @@ int	all_data(t_data	**head, t_init *var, t_envp *env_list)
 	t_data	*line;
 
 	new_node = malloc(sizeof(t_data));
-	free_in_parcer(&env_list->allocation, new_node, NULL);
 	line = *head;
 	new_node->arguments = var->arguments;
 	new_node->redirection = var->rdt;

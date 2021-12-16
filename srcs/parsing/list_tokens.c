@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 01:46:01 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/14 06:24:09 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/16 22:02:31 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,11 +20,9 @@ void	free_two(char **table)
 	while (table[i])
 	{
 		free(table[i]);
-		table[i] = NULL;
 		i++;
 	}
 	free(table);
-	table = NULL;
 }
 
 int	list_tokens(t_list **head, char *data, t_envp *env_list)

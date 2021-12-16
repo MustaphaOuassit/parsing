@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/19 16:09:13 by mouassit          #+#    #+#             */
-/*   Updated: 2021/11/20 11:01:15 by ayafdel          ###   ########.fr       */
+/*   Updated: 2021/12/16 22:30:10 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,9 +19,11 @@ int main(int argc, char **argv, char **envp)
 	t_data *data;
     t_envp *env_list;
 	t_free *tmp;
+	t_data *tmp_rdt;
 	int j;
 	int	len;
 	int error;
+	
 
 	i = 0;
 	j = 0;
@@ -48,29 +50,6 @@ int main(int argc, char **argv, char **envp)
 		if(!error)
 		{
 			env_list->exit_status = error;
-			while (data != NULL)
-			{
-				j = 0;
-				printf("-------------------\n");
-				printf("\n");
-				printf("Arguments :\n");
-				while (data->arguments[j])
-				{
-				printf("%s\n",data->arguments[j]);
-				j++;
-			}
-				printf("\n");
-				printf("Redirections :\n");
-			while (data->redirection != NULL)
-			{
-				printf("%s %d\n",data->redirection->file_name,data->redirection->type);
-				data->redirection = data->redirection->next;
-			}
-				printf("\n");
-				printf("Herdoc :\n");
-				printf("%d\n",data->nb_heredoc);
-				data = data->next;
-			}
 		}
 		else
 			env_list->exit_status = error;
@@ -80,16 +59,17 @@ int main(int argc, char **argv, char **envp)
 		while (env_list->allocation != NULL)
 		{
 			tmp = env_list->allocation->next;
-			if(env_list->allocation->value)
-				free(env_list->allocation->value);
-			if(env_list->allocation->table && !len)
-			{
-				free_two(env_list->allocation->table);
-				env_list->allocation->table = NULL;
-			}
-			len++;
+			free(env_list->allocation->value);
+			free(env_list->allocation->table);
 			free(env_list->allocation);
 			env_list->allocation = tmp;
+		}
+		while (data != NULL)
+		{
+			tmp_rdt = data->next;
+			free_two(data->arguments);
+			free(data);
+			data = tmp_rdt;
 		}
 		free(str);
 	// if (1 && is_builtin("export"))
