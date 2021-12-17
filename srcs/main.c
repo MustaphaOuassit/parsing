@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/19 16:09:13 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/16 23:41:55 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 00:51:41 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,8 +18,6 @@ int main(int argc, char **argv, char **envp)
 	int i;
 	t_data *data;
     t_envp *env_list;
-	t_free *tmp;
-	t_data *tmp_rdt;
 	int j;
 	int	len;
 	int error;
@@ -30,7 +28,6 @@ int main(int argc, char **argv, char **envp)
 
 	error = 0;
 	data = NULL;
-	tmp = NULL;
 
 	while(envp[i])
 	{
@@ -53,24 +50,8 @@ int main(int argc, char **argv, char **envp)
 		}
 		else
 			env_list->exit_status = error;
-
-
-			
-		while (env_list->allocation != NULL)
-		{
-			tmp = env_list->allocation->next;
-			free(env_list->allocation->value);
-			free(env_list->allocation->table);
-			free(env_list->allocation);
-			env_list->allocation = tmp;
-		}
-		while (data != NULL)
-		{
-			tmp_rdt = data->next;
-			free_two(data->arguments);
-			free(data);
-			data = tmp_rdt;
-		}
+		free_itmes(env_list->allocation);
+		// free_data(data);
 		free(str);
 	// if (1 && is_builtin("export"))
 	// {
