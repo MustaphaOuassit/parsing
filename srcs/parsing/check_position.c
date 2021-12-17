@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 03:00:47 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/17 00:12:53 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 02:15:24 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,22 +49,10 @@ int	all_data(t_data	**head, t_init *var, t_envp *env_list)
 {
 	t_data	*new_node;
 	t_data	*line;
-	int i;
 
-	i = 0;
-	while (var->arguments[i])
-		i++;
 	new_node = malloc(sizeof(t_data));
-	new_node->arguments = (char **)malloc(sizeof(char *) * (i + 1));
-	new_node->arguments[i] = 0;
-	i = 0;
-	while (var->arguments[i])
-	{
-		new_node->arguments[i] = ft_strdup(var->arguments[i]);
-		i++;
-	}
-	
 	line = *head;
+	add_data_arguments(new_node, var->arguments);
 	new_node->redirection = var->rdt;
 	new_node->nb_heredoc = env_list->nb_herdoc;
 	new_node->next = NULL;
@@ -74,9 +62,7 @@ int	all_data(t_data	**head, t_init *var, t_envp *env_list)
 		return (0);
 	}
 	while (line->next != NULL)
-	{
 		line = line->next;
-	}
 	line->next = new_node;
 	return (0);
 }

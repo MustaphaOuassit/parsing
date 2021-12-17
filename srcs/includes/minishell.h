@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/19 15:55:14 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/17 00:50:45 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 02:11:36 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -218,7 +218,7 @@ char	**put_data(t_init *var, t_envp *env_list);
 int		all_data(t_data	**head, t_init *var,t_envp *env_list);
 void	skip_value(char *value, int *start);
 int		len_args(char *value ,int *start);
-int		get_allocation(char *value,t_envp *env_list);
+int		get_allocation(char *value);
 void	fill_dollar_exp(t_init *var,int tmp ,char *value, int *start);
 char	*get_env(char *value, t_envp *env_list);
 int		len_ambiguous(char *value, int	i);
@@ -234,7 +234,7 @@ int		error_redirection(int check, t_tokens *tokens,t_envp *env_list);
 void	initialisation_get(t_init *var, char *value);
 void	skip_dlm(int *nb, int *len);
 void	fill_space(char *value, int *i, int *len, int ele);
-char	**check_len_values(char *value,int *len, int nb, t_envp *env_list);
+char	**check_len_values(char *value,int *len, int nb);
 int		allocation_expand(char *value, int *i);
 char	*get_env_hrd(char *value, t_envp *env_list);
 int		is_couts_hrd(char *value);
@@ -254,5 +254,6 @@ char	*get_env_couts(char *value, t_envp *env_list);
 int		len_couts(char *value);
 void	free_itmes(t_free *allocation);
 void	free_data(t_data *data);
+void	add_data_arguments(t_data *node, char **str);
  
 #endif

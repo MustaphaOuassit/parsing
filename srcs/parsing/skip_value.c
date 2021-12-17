@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 02:57:28 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/17 00:34:42 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 01:56:04 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,14 +44,12 @@ void	fill_space(char *value, int *i, int *len, int ele)
 	}
 }
 
-char	**check_len_values(char *value, int *len, int nb, t_envp *env_list)
+char	**check_len_values(char *value, int *len, int nb)
 {
 	char	**split;
 	int		i;
 
 	i = 0;
-	if(i == 1)
-		env_list = NULL;
 	split = ft_split(value, ' ');
 	while (split[i])
 		i++;

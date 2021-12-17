@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 02:59:22 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/17 00:14:31 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 01:57:02 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,5 +72,5 @@ void	initialisation_args(t_init *var, char *value, t_envp *env_list)
 	var->filter = NULL;
 	var->vtmp = ft_strdup(value);
 	free_in_parcer(&env_list->allocation, var->vtmp, NULL);
-	var->len = get_allocation(var->vtmp, env_list);
+	var->len = get_allocation(var->vtmp);
 }

@@ -6,13 +6,13 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 02:58:20 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/17 00:20:48 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 01:58:02 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-int	get_allocation(char *value, t_envp *env_list)
+int	get_allocation(char *value)
 {
 	t_init	var;
 
@@ -37,7 +37,7 @@ int	get_allocation(char *value, t_envp *env_list)
 		}
 		var.i++;
 	}
-	var.split = check_len_values(value, &var.len, var.nb, env_list);
+	var.split = check_len_values(value, &var.len, var.nb);
 	return (var.len);
 }
 
