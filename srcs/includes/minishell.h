@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/19 15:55:14 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/17 02:11:36 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 17:42:09 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -255,5 +255,6 @@ int		len_couts(char *value);
 void	free_itmes(t_free *allocation);
 void	free_data(t_data *data);
 void	add_data_arguments(t_data *node, char **str);
+void	initialisation_parsing(t_init *var, char *cmd, t_envp *env_list);
  
 #endif

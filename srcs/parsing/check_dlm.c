@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 02:06:23 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/16 22:27:15 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 17:15:51 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,10 +46,16 @@ int	allocation_expand(char *value, int *i)
 char	*get_env_hrd(char *value, t_envp *env_list)
 {
 	t_envp	*tmp;
+	char	*str;
 
+	str = NULL;
 	tmp = env_list;
 	if (value[0] == '?')
-		return (ft_itoa(env_list->exit_status));
+	{
+		str = ft_itoa(env_list->exit_status);
+		free_in_parcer(&env_list->allocation, str, NULL);
+		return (str);
+	}
 	while (tmp != NULL)
 	{
 		if (!ft_strcmp(tmp->key, value))

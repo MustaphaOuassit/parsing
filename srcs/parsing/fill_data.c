@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/26 16:25:08 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/17 02:14:42 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 17:41:47 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -79,4 +79,12 @@ void	add_data_arguments(t_data *node, char **str)
 		node->arguments[i] = ft_strdup(str[i]);
 		i++;
 	}
+}
+
+void	initialisation_parsing(t_init *var, char *cmd, t_envp *env_list)
+{
+	var->head = NULL;
+	var->start = skip_spaces(cmd);
+	var->token = NULL;
+	env_list->allocation = NULL;
 }

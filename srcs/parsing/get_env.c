@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 01:50:26 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/16 22:04:28 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 17:36:02 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,11 +17,17 @@ char	*get_env(char *value, t_envp *env_list)
 	char	*dollar;
 	int		len;
 	t_envp	*tmp;
+	char	*str;
 
+	str = NULL;
 	len = 0;
 	tmp = env_list;
 	if (value[0] == '?')
-		return (ft_itoa(env_list->exit_status));
+	{
+		str = ft_itoa(env_list->exit_status);
+		free_in_parcer(&env_list->allocation, str, NULL);
+		return (str);
+	}
 	dollar = dollar_allocation(value, &len, env_list);
 	dollar = fill_dollar_two(dollar, value, len, env_list);
 	if (env_list->type == 5)
@@ -64,10 +70,16 @@ char	*get_env_couts(char *value, t_envp *env_list)
 {
 	t_envp	*tmp;
 	char	*dollar;
+	char	*str;
 
+	str = NULL;
 	tmp = env_list;
 	if (value[0] == '?')
-		return (ft_itoa(env_list->exit_status));
+	{
+		str = ft_itoa(env_list->exit_status);
+		free_in_parcer(&env_list->allocation, str, NULL);
+		return (str);
+	}
 	dollar = fill_dollar_one(value, env_list);
 	if (env_list->type == 5)
 		return (dollar);

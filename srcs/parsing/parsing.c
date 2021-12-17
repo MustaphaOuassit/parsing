@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/21 10:26:07 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/16 23:21:35 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 17:41:27 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,10 +65,7 @@ int	parsing(char *cmd, int *error, t_envp *env_list, t_data **data)
 {
 	t_init	var;
 
-	env_list->allocation = NULL;
-	var.head = NULL;
-	var.start = skip_spaces(cmd);
-	var.token = NULL;
+	initialisation_parsing(&var, cmd, env_list);
 	*error = check_pipe(cmd, var.start);
 	if (*error)
 		return (0);
@@ -87,5 +84,8 @@ int	parsing(char *cmd, int *error, t_envp *env_list, t_data **data)
 		var.start++;
 	}
 	*error = continue_error(var.head, *error, env_list, data);
+	free_itmes(env_list->allocation);
+	if (*error == 258)
+		free_data(*data);
 	return (0);
 }
