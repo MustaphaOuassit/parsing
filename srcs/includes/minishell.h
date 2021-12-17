@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/19 15:55:14 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/17 17:42:09 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 20:07:56 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -209,7 +209,7 @@ int		put_in_parcer(t_tokens **head, char *value, int type,t_envp *env_list);
 int		check_dividers(int value, t_init *var);
 char	*put_diveder(char *data, int value, t_init *var, t_envp *env_list);
 void	print_error_rdt(char *value,t_envp *env_list);
-int		redirection_token(t_redirection	**head,int type, char *file_name, t_envp *env_list);
+int		redirection_token(t_redirection	**head,int type, char *file_name);
 char 	**filter_args(char *value,t_envp *env_list);
 int		args_token(t_args	**head, char *args, t_envp *env_list);
 int		redirection_value(t_tokens *tokens,t_envp *env_list,t_init *var);

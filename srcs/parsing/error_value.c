@@ -6,20 +6,20 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 03:08:42 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/17 01:46:02 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 20:09:15 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-int	error_value(t_init *var, char *value, t_envp *env_list)
+int	error_value(t_init *var, char *value)
 {
 	if (!ft_strcmp(value, "|"))
 	{
 		write(1, "minishell: syntax error near unexpected token `|'\n", 50);
 		return (1);
 	}
-	redirection_token(&var->rdt, var->type, value, env_list);
+	redirection_token(&var->rdt, var->type, value);
 	return (0);
 }
 
@@ -66,7 +66,7 @@ int	file_error(t_init *var, t_tokens *tokens, t_envp *env_list)
 	{
 		var->check = 0;
 		tokens->value = file_dollar(tokens, var, env_list);
-		if (error_value(var, tokens->value, env_list))
+		if (error_value(var, tokens->value))
 			return (1);
 	}
 	else

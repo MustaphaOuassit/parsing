@@ -6,21 +6,20 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 02:09:03 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/16 21:56:29 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 20:07:29 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-int	redirection_token(t_redirection	**head, int type, char *file, t_envp *env)
+int	redirection_token(t_redirection	**head, int type, char *file)
 {
 	t_redirection	*new_node;
 	t_redirection	*line;
 
 	new_node = malloc(sizeof(t_redirection));
-	free_in_parcer(&env->allocation, new_node, NULL);
 	line = *head;
-	new_node->file_name = file;
+	new_node->file_name = ft_strdup(file);
 	new_node->type = type;
 	new_node->next = NULL;
 	if (*head == NULL)
