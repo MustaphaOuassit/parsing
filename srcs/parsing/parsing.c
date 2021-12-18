@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/21 10:26:07 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/17 17:41:27 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/18 13:17:08 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,14 +61,17 @@ int	continue_error(t_list *head, int error, t_envp *env_list, t_data **data)
 	return (error);
 }
 
-int	parsing(char *cmd, int *error, t_envp *env_list, t_data **data)
+int	parsing(char *cmd, t_envp *env_list, t_data **data)
 {
 	t_init	var;
 
 	initialisation_parsing(&var, cmd, env_list);
-	*error = check_pipe(cmd, var.start);
-	if (*error)
-		return (0);
+	if (var.error)
+	{
+		free(cmd);
+		env_list->exit_status = var.error;
+		return (var.error);
+	}
 	while (var.start < (int)ft_strlen(cmd))
 	{
 		if (cmd[var.start] != ' ')
@@ -76,16 +79,13 @@ int	parsing(char *cmd, int *error, t_envp *env_list, t_data **data)
 			var.token = get_token(cmd, &var.start, env_list);
 			if (var.start == -1)
 			{
-				*error = 1;
+				var.error = 1;
 				break ;
 			}
 			list_tokens(&var.head, var.token, env_list);
 		}
 		var.start++;
 	}
-	*error = continue_error(var.head, *error, env_list, data);
-	free_itmes(env_list->allocation);
-	if (*error == 258)
-		free_data(*data);
-	return (0);
+	parsing_errors(&var, env_list, data, cmd);
+	return (var.error);
 }

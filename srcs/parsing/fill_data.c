@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/26 16:25:08 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/17 17:41:47 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/18 13:14:45 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -51,17 +51,27 @@ void	free_itmes(t_free *allocation)
 	}
 }
 
-void	free_data(t_data *data)
+void	free_data(t_data **data)
 {
-	t_data	*tmp_rdt;
+	t_data			*tmp_data;
+	t_redirection	*tmp_rdt;
 
-	while (data != NULL)
+	while (*data != NULL)
 	{
-		tmp_rdt = data->next;
-		free_two(data->arguments);
-		free(data);
-		data = tmp_rdt;
+		tmp_data = (*data)->next;
+		while ((*data)->redirection)
+		{
+			tmp_rdt = (*data)->redirection->next;
+			free((*data)->redirection->file_name);
+			free((*data)->redirection);
+			(*data)->redirection = tmp_rdt;
+		}
+		if ((*data)->arguments)
+			free_two((*data)->arguments);
+		free((*data));
+		(*data) = tmp_data;
 	}
+	(*data) = NULL;
 }
 
 void	add_data_arguments(t_data *node, char **str)
@@ -71,13 +81,16 @@ void	add_data_arguments(t_data *node, char **str)
 	i = 0;
 	while (str[i])
 		i++;
-	node->arguments = (char **)malloc(sizeof(char *) * (i + 1));
-	node->arguments[i] = 0;
-	i = 0;
-	while (str[i])
+	if (i)
 	{
-		node->arguments[i] = ft_strdup(str[i]);
-		i++;
+		node->arguments = (char **)malloc(sizeof(char *) * (i + 1));
+		node->arguments[i] = 0;
+		i = 0;
+		while (str[i])
+		{
+			node->arguments[i] = ft_strdup(str[i]);
+			i++;
+		}
 	}
 }
 
@@ -87,4 +100,5 @@ void	initialisation_parsing(t_init *var, char *cmd, t_envp *env_list)
 	var->start = skip_spaces(cmd);
 	var->token = NULL;
 	env_list->allocation = NULL;
+	var->error = check_pipe(cmd, var->start);
 }

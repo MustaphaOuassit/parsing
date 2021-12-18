@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   check_position.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 03:00:47 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/17 17:24:48 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/17 20:22:38 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,6 +52,7 @@ int	all_data(t_data	**head, t_init *var, t_envp *env_list)
 
 	new_node = malloc(sizeof(t_data));
 	line = *head;
+	new_node->arguments = NULL;
 	add_data_arguments(new_node, var->arguments);
 	new_node->redirection = var->rdt;
 	new_node->nb_heredoc = env_list->nb_herdoc;
