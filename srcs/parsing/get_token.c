@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_token.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 01:43:35 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/16 23:19:18 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/19 18:50:51 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -68,6 +68,7 @@ int	multi_couts(int *i, char *cmd, int ele)
 		}
 		*i = *i + 1;
 	}
+	*i = *i - 1;
 	return (0);
 }
 

@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/26 16:25:08 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/18 13:14:45 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/20 11:23:37 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,18 +37,19 @@ int	fill_data(t_tokens *tokens, t_data **data, t_envp *env_list)
 	return (0);
 }
 
-void	free_itmes(t_free *allocation)
+void	free_items(t_free **allocation)
 {
 	t_free	*tmp;
 
-	while (allocation != NULL)
+	while (*allocation != NULL)
 	{
-		tmp = allocation->next;
-		free(allocation->value);
-		free(allocation->table);
-		free(allocation);
-		allocation = tmp;
+		tmp = (*allocation)->next;
+		free((*allocation)->value);
+		free((*allocation)->table);
+		free((*allocation));
+		(*allocation) = tmp;
 	}
+	*allocation = NULL;
 }
 
 void	free_data(t_data **data)

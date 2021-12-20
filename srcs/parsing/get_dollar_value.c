@@ -6,7 +6,7 @@
 /*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 02:07:51 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/16 22:05:58 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/20 10:53:56 by mouassit         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,7 +59,6 @@ void	initialisation_expand(t_init *var, char *value, t_envp *env_list)
 	var->exp = NULL;
 	var->len = len_expand(value, env_list);
 	var->dollar = (char *)malloc(sizeof(char) * (var->len + 1));
-	free_in_parcer(&env_list->allocation, var->dollar, NULL);
 	var->dollar[var->len] = '\0';
 	var->env = NULL;
 }
@@ -94,6 +93,6 @@ char	*expand_value(char *value, t_envp *env_list)
 		else
 			fill_expand(var.dollar, value, &var.tmp, var.i);
 		var.i++;
-	}
+	}	
 	return (var.dollar);
 }

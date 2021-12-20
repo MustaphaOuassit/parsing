@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   skip_spaces.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mouassit <mouassit@student.42.fr>          +#+  +:+       +#+        */
+/*   By: ayafdel <ayafdel@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/12/14 01:40:40 by mouassit          #+#    #+#             */
-/*   Updated: 2021/12/14 06:38:03 by mouassit         ###   ########.fr       */
+/*   Updated: 2021/12/19 17:54:26 by ayafdel          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,9 @@ int	check_close(char *value, int i, int ele)
 	while (value[i])
 	{
 		if (value[i] == ele)
+		{
 			return (1);
+		}
 		i++;
 	}
 	return (0);
@@ -40,12 +42,7 @@ int	check_close(char *value, int i, int ele)
 int	check_double_couts(char *value, int *i, int *len, int *close)
 {
 	*i = *i + 1;
-	*close = check_close(value, *i, '\"');
-	if (!*close)
-	{
-		*len = -1;
-		return (*len);
-	}
+	*close = 0;
 	*len = *len + 1;
 	while (value[*i])
 	{
@@ -60,13 +57,8 @@ int	check_double_couts(char *value, int *i, int *len, int *close)
 int	check_single_couts(char *value, int *i, int *len, int *close)
 {
 	*i = *i + 1;
-	*close = check_close(value, *i, '\'');
-	if (!*close)
-	{
-		*len = -1;
-		return (*len);
-	}
 	*len = *len + 1;
+	*close = 0;
 	while (value[*i])
 	{
 		if (value[*i] == '\'')
